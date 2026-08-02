@@ -1,0 +1,6 @@
+@OzmenZimparaMarket.WebAPI_HostAddress = http://localhost:5279
+
+GET {{OzmenZimparaMarket.WebAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
