@@ -1,14 +1,18 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "P:\\Projeler\\ozmenzimparamarket\\OzmenZimparaMarket\\",
+  "WorkspaceRootPath": "C:\\Users\\mehmet.yalcinkaya\\Desktop\\OrtakWSKlasor\\Projeler\\ozmenzimparamarket\\OzmenZimparaMarket\\OzmenZimparaMarket\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{FF24F27B-0FA2-03DB-1F29-B7553F084B58}|OzmenZimparaMarket.WebAPI\\OzmenZimparaMarket.WebAPI.csproj|p:\\projeler\\ozmenzimparamarket\\ozmenzimparamarket\\ozmenzimparamarket.webapi\\controllers\\urundetaylaricontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{FF24F27B-0FA2-03DB-1F29-B7553F084B58}|OzmenZimparaMarket.WebAPI\\OzmenZimparaMarket.WebAPI.csproj|solutionrelative:ozmenzimparamarket.webapi\\controllers\\urundetaylaricontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{FF24F27B-0FA2-03DB-1F29-B7553F084B58}|OzmenZimparaMarket.WebAPI\\OzmenZimparaMarket.WebAPI.csproj|c:\\users\\mehmet.yalcinkaya\\desktop\\ortakwsklasor\\projeler\\ozmenzimparamarket\\ozmenzimparamarket\\ozmenzimparamarket\\ozmenzimparamarket.webapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FF24F27B-0FA2-03DB-1F29-B7553F084B58}|OzmenZimparaMarket.WebAPI\\OzmenZimparaMarket.WebAPI.csproj|solutionrelative:ozmenzimparamarket.webapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{FF24F27B-0FA2-03DB-1F29-B7553F084B58}|OzmenZimparaMarket.WebAPI\\OzmenZimparaMarket.WebAPI.csproj|p:\\projeler\\ozmenzimparamarket\\ozmenzimparamarket\\ozmenzimparamarket.webapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{FF24F27B-0FA2-03DB-1F29-B7553F084B58}|OzmenZimparaMarket.WebAPI\\OzmenZimparaMarket.WebAPI.csproj|solutionrelative:ozmenzimparamarket.webapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{FF24F27B-0FA2-03DB-1F29-B7553F084B58}|OzmenZimparaMarket.WebAPI\\OzmenZimparaMarket.WebAPI.csproj|c:\\users\\mehmet.yalcinkaya\\desktop\\ortakwsklasor\\projeler\\ozmenzimparamarket\\ozmenzimparamarket\\ozmenzimparamarket\\ozmenzimparamarket.webapi\\ozmenzimparamarket.webapi.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{FF24F27B-0FA2-03DB-1F29-B7553F084B58}|OzmenZimparaMarket.WebAPI\\OzmenZimparaMarket.WebAPI.csproj|solutionrelative:ozmenzimparamarket.webapi\\ozmenzimparamarket.webapi.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{56F4F0A7-7FCA-68FB-3009-B8E224536D4A}|OzmenZimparaMarket.Infrastructure\\OzmenZimparaMarket.Infrastructure.csproj|c:\\users\\mehmet.yalcinkaya\\desktop\\ortakwsklasor\\projeler\\ozmenzimparamarket\\ozmenzimparamarket\\ozmenzimparamarket\\ozmenzimparamarket.infrastructure\\ozmenzimparamarket.infrastructure.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{56F4F0A7-7FCA-68FB-3009-B8E224536D4A}|OzmenZimparaMarket.Infrastructure\\OzmenZimparaMarket.Infrastructure.csproj|solutionrelative:ozmenzimparamarket.infrastructure\\ozmenzimparamarket.infrastructure.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     }
   ],
   "DocumentGroupContainers": [
@@ -23,32 +27,39 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "UrunDetaylariController.cs",
-              "DocumentMoniker": "P:\\Projeler\\ozmenzimparamarket\\OzmenZimparaMarket\\OzmenZimparaMarket.WebAPI\\Controllers\\UrunDetaylariController.cs",
-              "RelativeDocumentMoniker": "OzmenZimparaMarket.WebAPI\\Controllers\\UrunDetaylariController.cs",
-              "ToolTip": "P:\\Projeler\\ozmenzimparamarket\\OzmenZimparaMarket\\OzmenZimparaMarket.WebAPI\\Controllers\\UrunDetaylariController.cs",
-              "RelativeToolTip": "OzmenZimparaMarket.WebAPI\\Controllers\\UrunDetaylariController.cs",
-              "ViewState": "AgIAAAIAAAAAAAAAAAASwB4AAABmAAAAAAAAAA==",
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\mehmet.yalcinkaya\\Desktop\\OrtakWSKlasor\\Projeler\\ozmenzimparamarket\\OzmenZimparaMarket\\OzmenZimparaMarket\\OzmenZimparaMarket.WebAPI\\Program.cs",
+              "RelativeDocumentMoniker": "OzmenZimparaMarket.WebAPI\\Program.cs",
+              "ToolTip": "C:\\Users\\mehmet.yalcinkaya\\Desktop\\OrtakWSKlasor\\Projeler\\ozmenzimparamarket\\OzmenZimparaMarket\\OzmenZimparaMarket\\OzmenZimparaMarket.WebAPI\\Program.cs",
+              "RelativeToolTip": "OzmenZimparaMarket.WebAPI\\Program.cs",
+              "ViewState": "AgIAADAAAAAAAAAAAAAWwD0AAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-02T06:59:26.129Z",
+              "WhenOpened": "2026-08-05T06:01:56.373Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "Program.cs",
-              "DocumentMoniker": "P:\\Projeler\\ozmenzimparamarket\\OzmenZimparaMarket\\OzmenZimparaMarket.WebAPI\\Program.cs",
-              "RelativeDocumentMoniker": "OzmenZimparaMarket.WebAPI\\Program.cs",
-              "ToolTip": "P:\\Projeler\\ozmenzimparamarket\\OzmenZimparaMarket\\OzmenZimparaMarket.WebAPI\\Program.cs",
-              "RelativeToolTip": "OzmenZimparaMarket.WebAPI\\Program.cs",
-              "ViewState": "AgIAAB0AAAAAAAAAAAAAAKwAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-02T06:58:15.103Z",
-              "EditorCaption": ""
+              "Title": "OzmenZimparaMarket.WebAPI.csproj",
+              "DocumentMoniker": "C:\\Users\\mehmet.yalcinkaya\\Desktop\\OrtakWSKlasor\\Projeler\\ozmenzimparamarket\\OzmenZimparaMarket\\OzmenZimparaMarket\\OzmenZimparaMarket.WebAPI\\OzmenZimparaMarket.WebAPI.csproj",
+              "RelativeDocumentMoniker": "OzmenZimparaMarket.WebAPI\\OzmenZimparaMarket.WebAPI.csproj",
+              "ToolTip": "C:\\Users\\mehmet.yalcinkaya\\Desktop\\OrtakWSKlasor\\Projeler\\ozmenzimparamarket\\OzmenZimparaMarket\\OzmenZimparaMarket\\OzmenZimparaMarket.WebAPI\\OzmenZimparaMarket.WebAPI.csproj",
+              "RelativeToolTip": "OzmenZimparaMarket.WebAPI\\OzmenZimparaMarket.WebAPI.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-08-05T05:57:50.605Z"
             },
             {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{0ad07096-bba9-4900-a651-0598d26f6d24}"
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "OzmenZimparaMarket.Infrastructure.csproj",
+              "DocumentMoniker": "C:\\Users\\mehmet.yalcinkaya\\Desktop\\OrtakWSKlasor\\Projeler\\ozmenzimparamarket\\OzmenZimparaMarket\\OzmenZimparaMarket\\OzmenZimparaMarket.Infrastructure\\OzmenZimparaMarket.Infrastructure.csproj",
+              "RelativeDocumentMoniker": "OzmenZimparaMarket.Infrastructure\\OzmenZimparaMarket.Infrastructure.csproj",
+              "ToolTip": "C:\\Users\\mehmet.yalcinkaya\\Desktop\\OrtakWSKlasor\\Projeler\\ozmenzimparamarket\\OzmenZimparaMarket\\OzmenZimparaMarket\\OzmenZimparaMarket.Infrastructure\\OzmenZimparaMarket.Infrastructure.csproj",
+              "RelativeToolTip": "OzmenZimparaMarket.Infrastructure\\OzmenZimparaMarket.Infrastructure.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-08-05T05:57:29.024Z"
             }
           ]
         }
