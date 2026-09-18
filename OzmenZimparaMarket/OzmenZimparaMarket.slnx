@@ -2,5 +2,6 @@
   <Project Path="OzmenZimparaMarket.Application/OzmenZimparaMarket.Application.csproj" />
   <Project Path="OzmenZimparaMarket.Domain/OzmenZimparaMarket.Domain.csproj" />
   <Project Path="OzmenZimparaMarket.Infrastructure/OzmenZimparaMarket.Infrastructure.csproj" />
+  <Project Path="OzmenZimparaMarket.Tests/OzmenZimparaMarket.Tests.csproj" />
   <Project Path="OzmenZimparaMarket.WebAPI/OzmenZimparaMarket.WebAPI.csproj" />
 </Solution>

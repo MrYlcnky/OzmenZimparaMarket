@@ -12,11 +12,15 @@ public interface IKategoriServisi
 
     Task<KategoriListeDto?> SeoUrlIleGetirAsync(string seoUrl, CancellationToken cancellationToken = default);
 
+    Task<KategoriListeDto?> SeoYoluIleGetirAsync(string seoYolu, CancellationToken cancellationToken = default);
+
     Task<KategoriListeDto> EkleAsync(KategoriEkleDto dto, CancellationToken cancellationToken = default);
 
     Task<KategoriListeDto> GuncelleAsync(int id, KategoriGuncelleDto dto, CancellationToken cancellationToken = default);
 
     Task SilAsync(int id, CancellationToken cancellationToken = default);
+
+    Task<KategoriTopluSilSonucDto> TopluSilAsync(KategoriTopluSilDto dto, CancellationToken cancellationToken = default);
 
     Task<KategoriListeDto> DurumDegistirAsync(int id, bool aktifMi, CancellationToken cancellationToken = default);
 }

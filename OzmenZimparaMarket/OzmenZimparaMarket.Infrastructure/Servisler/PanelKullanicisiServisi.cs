@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OzmenZimparaMarket.Application.DTOs.PanelKullanicisiDtos;
 using OzmenZimparaMarket.Application.Interfaces;
+using OzmenZimparaMarket.Application.Istisnalar;
 using OzmenZimparaMarket.Domain.Entityler;
 using OzmenZimparaMarket.Infrastructure.Veritabani;
 
@@ -45,7 +46,8 @@ public class PanelKullanicisiServisi : IPanelKullanicisiServisi
         var kullaniciAdi = dto.KullaniciAdi.Trim();
         var adSoyad = dto.AdSoyad.Trim();
 
-        if (await KullaniciAdiKullaniliyorMuAsync(kullaniciAdi, null, cancellationToken)) throw new InvalidOperationException("Bu kullanıcı adı daha önce kullanılmıştır.");
+        if (await KullaniciAdiKullaniliyorMuAsync(kullaniciAdi, null, cancellationToken))
+            throw new CakismaException("Bu kullanıcı adı daha önce kullanılmıştır.");
 
         var kullanici = new PanelKullanicisi
         {
@@ -59,21 +61,25 @@ public class PanelKullanicisiServisi : IPanelKullanicisiServisi
         await _dbContext.PanelKullanicilari.AddAsync(kullanici, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        return await DtoGetirAsync(kullanici.Id, cancellationToken) ?? throw new InvalidOperationException("Eklenen panel kullanıcısı getirilemedi.");
+        return await DtoGetirAsync(kullanici.Id, cancellationToken)
+               ?? throw new InvalidOperationException("Eklenen panel kullanıcısı getirilemedi.");
     }
 
     public async Task<PanelKullanicisiListeDto> GuncelleAsync(int id, PanelKullanicisiGuncelleDto dto, CancellationToken cancellationToken = default)
     {
         var kullanici = await _dbContext.PanelKullanicilari.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-        if (kullanici is null) throw new KeyNotFoundException("Güncellenecek panel kullanıcısı bulunamadı.");
+        if (kullanici is null)
+            throw new KaynakBulunamadiException("Güncellenecek panel kullanıcısı bulunamadı.");
 
         var kullaniciAdi = dto.KullaniciAdi.Trim();
         var adSoyad = dto.AdSoyad.Trim();
 
-        if (await KullaniciAdiKullaniliyorMuAsync(kullaniciAdi, id, cancellationToken)) throw new InvalidOperationException("Bu kullanıcı adı başka bir panel kullanıcısı tarafından kullanılıyor.");
+        if (await KullaniciAdiKullaniliyorMuAsync(kullaniciAdi, id, cancellationToken))
+            throw new CakismaException("Bu kullanıcı adı başka bir panel kullanıcısı tarafından kullanılıyor.");
 
-        if (kullanici.AktifMi && !dto.AktifMi) await SonAktifKullaniciKontroluAsync(id, cancellationToken);
+        if (kullanici.AktifMi && !dto.AktifMi)
+            await SonAktifKullaniciKontroluAsync(id, cancellationToken);
 
         kullanici.KullaniciAdi = kullaniciAdi;
         kullanici.AdSoyad = adSoyad;
@@ -82,18 +88,22 @@ public class PanelKullanicisiServisi : IPanelKullanicisiServisi
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        return await DtoGetirAsync(kullanici.Id, cancellationToken) ?? throw new InvalidOperationException("Güncellenen panel kullanıcısı getirilemedi.");
+        return await DtoGetirAsync(kullanici.Id, cancellationToken)
+               ?? throw new InvalidOperationException("Güncellenen panel kullanıcısı getirilemedi.");
     }
 
     public async Task SilAsync(int id, CancellationToken cancellationToken = default)
     {
         var kullanici = await _dbContext.PanelKullanicilari.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-        if (kullanici is null) throw new KeyNotFoundException("Silinecek panel kullanıcısı bulunamadı.");
+        if (kullanici is null)
+            throw new KaynakBulunamadiException("Silinecek panel kullanıcısı bulunamadı.");
 
-        if (kullanici.AktifMi) await SonAktifKullaniciKontroluAsync(id, cancellationToken);
+        if (kullanici.AktifMi)
+            await SonAktifKullaniciKontroluAsync(id, cancellationToken);
 
         _dbContext.PanelKullanicilari.Remove(kullanici);
+
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
@@ -101,27 +111,39 @@ public class PanelKullanicisiServisi : IPanelKullanicisiServisi
     {
         var kullanici = await _dbContext.PanelKullanicilari.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-        if (kullanici is null) throw new KeyNotFoundException("Panel kullanıcısı bulunamadı.");
+        if (kullanici is null)
+            throw new KaynakBulunamadiException("Panel kullanıcısı bulunamadı.");
 
-        if (kullanici.AktifMi && !aktifMi) await SonAktifKullaniciKontroluAsync(id, cancellationToken);
+        if (kullanici.AktifMi && !aktifMi)
+            await SonAktifKullaniciKontroluAsync(id, cancellationToken);
 
         kullanici.AktifMi = aktifMi;
         kullanici.GuncellemeTarihi = DateTime.UtcNow;
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        return await DtoGetirAsync(kullanici.Id, cancellationToken) ?? throw new InvalidOperationException("Panel kullanıcısı getirilemedi.");
+        return await DtoGetirAsync(kullanici.Id, cancellationToken)
+               ?? throw new InvalidOperationException("Panel kullanıcısı getirilemedi.");
     }
 
     public async Task SifreDegistirAsync(int kullaniciId, PanelKullanicisiSifreDegistirDto dto, CancellationToken cancellationToken = default)
     {
         var kullanici = await _dbContext.PanelKullanicilari.FirstOrDefaultAsync(x => x.Id == kullaniciId, cancellationToken);
 
-        if (kullanici is null) throw new KeyNotFoundException("Panel kullanıcısı bulunamadı.");
-        if (!kullanici.AktifMi) throw new InvalidOperationException("Pasif panel kullanıcısının şifresi değiştirilemez.");
-        if (!_sifreHashServisi.Dogrula(dto.MevcutSifre, kullanici.SifreHash)) throw new InvalidOperationException("Mevcut şifre hatalıdır.");
-        if (dto.YeniSifre != dto.YeniSifreTekrar) throw new InvalidOperationException("Yeni şifreler birbiriyle eşleşmiyor.");
-        if (_sifreHashServisi.Dogrula(dto.YeniSifre, kullanici.SifreHash)) throw new InvalidOperationException("Yeni şifre mevcut şifreyle aynı olamaz.");
+        if (kullanici is null)
+            throw new KaynakBulunamadiException("Panel kullanıcısı bulunamadı.");
+
+        if (!kullanici.AktifMi)
+            throw new IsKuraliException("Pasif panel kullanıcısının şifresi değiştirilemez.");
+
+        if (!_sifreHashServisi.Dogrula(dto.MevcutSifre, kullanici.SifreHash))
+            throw new IsKuraliException("Mevcut şifre hatalıdır.");
+
+        if (dto.YeniSifre != dto.YeniSifreTekrar)
+            throw new IsKuraliException("Yeni şifreler birbiriyle eşleşmiyor.");
+
+        if (_sifreHashServisi.Dogrula(dto.YeniSifre, kullanici.SifreHash))
+            throw new IsKuraliException("Yeni şifre mevcut şifreyle aynı olamaz.");
 
         kullanici.SifreHash = _sifreHashServisi.Hashle(dto.YeniSifre);
         kullanici.GuncellemeTarihi = DateTime.UtcNow;
@@ -133,9 +155,14 @@ public class PanelKullanicisiServisi : IPanelKullanicisiServisi
     {
         var kullanici = await _dbContext.PanelKullanicilari.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-        if (kullanici is null) throw new KeyNotFoundException("Şifresi sıfırlanacak panel kullanıcısı bulunamadı.");
-        if (dto.YeniSifre != dto.YeniSifreTekrar) throw new InvalidOperationException("Yeni şifreler birbiriyle eşleşmiyor.");
-        if (_sifreHashServisi.Dogrula(dto.YeniSifre, kullanici.SifreHash)) throw new InvalidOperationException("Yeni şifre mevcut şifreyle aynı olamaz.");
+        if (kullanici is null)
+            throw new KaynakBulunamadiException("Şifresi sıfırlanacak panel kullanıcısı bulunamadı.");
+
+        if (dto.YeniSifre != dto.YeniSifreTekrar)
+            throw new IsKuraliException("Yeni şifreler birbiriyle eşleşmiyor.");
+
+        if (_sifreHashServisi.Dogrula(dto.YeniSifre, kullanici.SifreHash))
+            throw new IsKuraliException("Yeni şifre mevcut şifreyle aynı olamaz.");
 
         kullanici.SifreHash = _sifreHashServisi.Hashle(dto.YeniSifre);
         kullanici.GuncellemeTarihi = DateTime.UtcNow;
@@ -145,18 +172,24 @@ public class PanelKullanicisiServisi : IPanelKullanicisiServisi
 
     private async Task<bool> KullaniciAdiKullaniliyorMuAsync(string kullaniciAdi, int? haricKullaniciId, CancellationToken cancellationToken)
     {
-        var sorgu = _dbContext.PanelKullanicilari.AsNoTracking().Where(x => x.KullaniciAdi == kullaniciAdi);
+        var sorgu = _dbContext.PanelKullanicilari
+            .AsNoTracking()
+            .Where(x => x.KullaniciAdi == kullaniciAdi);
 
-        if (haricKullaniciId.HasValue) sorgu = sorgu.Where(x => x.Id != haricKullaniciId.Value);
+        if (haricKullaniciId.HasValue)
+            sorgu = sorgu.Where(x => x.Id != haricKullaniciId.Value);
 
         return await sorgu.AnyAsync(cancellationToken);
     }
 
     private async Task SonAktifKullaniciKontroluAsync(int haricKullaniciId, CancellationToken cancellationToken)
     {
-        var baskaAktifKullaniciVarMi = await _dbContext.PanelKullanicilari.AsNoTracking().AnyAsync(x => x.Id != haricKullaniciId && x.AktifMi, cancellationToken);
+        var baskaAktifKullaniciVarMi = await _dbContext.PanelKullanicilari
+            .AsNoTracking()
+            .AnyAsync(x => x.Id != haricKullaniciId && x.AktifMi, cancellationToken);
 
-        if (!baskaAktifKullaniciVarMi) throw new InvalidOperationException("Sistemdeki son aktif panel kullanıcısı silinemez veya pasife alınamaz.");
+        if (!baskaAktifKullaniciVarMi)
+            throw new IsKuraliException("Sistemdeki son aktif panel kullanıcısı silinemez veya pasife alınamaz.");
     }
 
     private async Task<PanelKullanicisiListeDto?> DtoGetirAsync(int id, CancellationToken cancellationToken)

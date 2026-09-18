@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using OzmenZimparaMarket.Application.DTOs.KategoriDtos;
+using OzmenZimparaMarket.Application.Validasyonlar.Ortak;
 
 namespace OzmenZimparaMarket.Application.Validasyonlar.KategoriDtos;
 
@@ -13,7 +14,11 @@ public class KategoriGuncelleDtoValidator : AbstractValidator<KategoriGuncelleDt
 
         RuleFor(x => x.Aciklama).MaximumLength(2000).WithMessage("Kategori açıklaması en fazla 2000 karakter olabilir.");
 
-        RuleFor(x => x.GorselYolu).MaximumLength(500).WithMessage("Görsel yolu en fazla 500 karakter olabilir.");
+        RuleFor(x => x.GorselYolu)
+     .MaximumLength(500)
+     .WithMessage("Görsel yolu en fazla 500 karakter olabilir.")
+     .Must(GorselYoluDogrulama.KategoriGorselYoluGecerliMi)
+     .WithMessage("Kategori görsel yolu geçersizdir.");
 
         RuleFor(x => x.SeoUrl).MaximumLength(250).WithMessage("SEO URL en fazla 250 karakter olabilir.");
 

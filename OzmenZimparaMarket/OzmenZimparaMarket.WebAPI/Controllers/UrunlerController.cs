@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using OzmenZimparaMarket.Application.DTOs.UrunDtos;
 using OzmenZimparaMarket.Application.Interfaces;
+using OzmenZimparaMarket.Application.Istisnalar;
 
 namespace OzmenZimparaMarket.WebAPI.Controllers;
 
@@ -14,15 +15,6 @@ public class UrunlerController : ControllerBase
     public UrunlerController(IUrunServisi urunServisi)
     {
         _urunServisi = urunServisi;
-    }
-
-    [AllowAnonymous]
-    [HttpGet("listele")]
-    public async Task<IActionResult> Listele(CancellationToken cancellationToken)
-    {
-        var urunler = await _urunServisi.TumunuGetirAsync(true, cancellationToken);
-
-        return Ok(urunler);
     }
 
     [AllowAnonymous]
@@ -42,7 +34,8 @@ public class UrunlerController : ControllerBase
     {
         var urun = await _urunServisi.SeoUrlIleGetirAsync(seoUrl, cancellationToken);
 
-        if (urun is null) throw new KeyNotFoundException("Ürün bulunamadı.");
+        if (urun is null)
+            throw new KaynakBulunamadiException("Ürün bulunamadı.");
 
         return Ok(urun);
     }
@@ -58,20 +51,17 @@ public class UrunlerController : ControllerBase
 
     [AllowAnonymous]
     [HttpGet("filtre-secenekleri")]
-    public async Task<IActionResult> FiltreSecenekleri([FromQuery] int? kategoriId = null, [FromQuery] bool altKategorilerDahilMi = true, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> FiltreSecenekleri(
+        [FromQuery] int? kategoriId = null,
+        [FromQuery] bool altKategorilerDahilMi = true,
+        CancellationToken cancellationToken = default)
     {
-        var filtreSecenekleri = await _urunServisi.FiltreSecenekleriniGetirAsync(kategoriId, altKategorilerDahilMi, cancellationToken);
+        var filtreSecenekleri = await _urunServisi.FiltreSecenekleriniGetirAsync(
+            kategoriId,
+            altKategorilerDahilMi,
+            cancellationToken);
 
         return Ok(filtreSecenekleri);
-    }
-
-    [Authorize]
-    [HttpGet("yonetim-listele")]
-    public async Task<IActionResult> YonetimListele(CancellationToken cancellationToken)
-    {
-        var urunler = await _urunServisi.TumunuGetirAsync(false, cancellationToken);
-
-        return Ok(urunler);
     }
 
     [Authorize]
@@ -89,7 +79,8 @@ public class UrunlerController : ControllerBase
     {
         var urun = await _urunServisi.IdIleGetirAsync(id, cancellationToken);
 
-        if (urun is null) throw new KeyNotFoundException("Ürün bulunamadı.");
+        if (urun is null)
+            throw new KaynakBulunamadiException("Ürün bulunamadı.");
 
         return Ok(urun);
     }
@@ -114,11 +105,26 @@ public class UrunlerController : ControllerBase
 
     [Authorize]
     [HttpPatch("durum-degistir/{id:int}")]
-    public async Task<IActionResult> DurumDegistir(int id, [FromQuery] bool aktifMi, CancellationToken cancellationToken)
+    public async Task<IActionResult> DurumDegistir(int id, [FromQuery] bool? aktifMi, CancellationToken cancellationToken)
     {
-        var urun = await _urunServisi.DurumDegistirAsync(id, aktifMi, cancellationToken);
+        if (!aktifMi.HasValue)
+            throw new IsKuraliException("Aktiflik durumu belirtilmelidir.");
+
+        var urun = await _urunServisi.DurumDegistirAsync(id, aktifMi.Value, cancellationToken);
 
         return Ok(urun);
+    }
+
+    [Authorize]
+    [HttpPost("toplu-sil")]
+    public async Task<IActionResult> TopluSil( UrunTopluSilDto dto, CancellationToken cancellationToken)
+    {
+        var sonuc =
+            await _urunServisi.TopluSilAsync(
+                dto,
+                cancellationToken);
+
+        return Ok(sonuc);
     }
 
     [Authorize]
@@ -129,6 +135,4 @@ public class UrunlerController : ControllerBase
 
         return NoContent();
     }
-
-
 }

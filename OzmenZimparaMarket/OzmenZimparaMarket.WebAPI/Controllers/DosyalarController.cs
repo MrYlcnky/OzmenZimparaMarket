@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OzmenZimparaMarket.Application.DTOs.DosyaDtos;
 using OzmenZimparaMarket.Application.Interfaces;
+using OzmenZimparaMarket.Application.Istisnalar;
 
 namespace OzmenZimparaMarket.WebAPI.Controllers;
 
@@ -22,7 +23,7 @@ public class DosyalarController : ControllerBase
 
     [HttpPost("urun-gorseli-yukle")]
     [Consumes("multipart/form-data")]
-    public async Task<IActionResult> UrunGorseliYukle([FromForm] IFormFile dosya, CancellationToken cancellationToken)
+    public async Task<IActionResult> UrunGorseliYukle(IFormFile dosya, CancellationToken cancellationToken)
     {
         DosyayiDogrula(dosya);
 
@@ -39,7 +40,7 @@ public class DosyalarController : ControllerBase
 
     [HttpPost("kategori-gorseli-yukle")]
     [Consumes("multipart/form-data")]
-    public async Task<IActionResult> KategoriGorseliYukle([FromForm] IFormFile dosya, CancellationToken cancellationToken)
+    public async Task<IActionResult> KategoriGorseliYukle(IFormFile dosya, CancellationToken cancellationToken)
     {
         DosyayiDogrula(dosya);
 
@@ -54,6 +55,26 @@ public class DosyalarController : ControllerBase
         return Ok(sonuc);
     }
 
+    [HttpPost("urun-gorseline-kopyala")]
+    public async Task<IActionResult> UrunGorselineKopyala(
+    [FromQuery] string dosyaYolu,
+    CancellationToken cancellationToken)
+    {
+        var sonuc = await _dosyaServisi.UrunGorselineKopyalaAsync(
+            dosyaYolu,
+            cancellationToken);
+
+        return Ok(sonuc);
+    }
+
+    [HttpGet("urun-gorselleri")]
+    public async Task<IActionResult> UrunGorselleriniGetir(CancellationToken cancellationToken)
+    {
+        var sonuc = await _dosyaServisi.UrunGorselleriniGetirAsync(cancellationToken);
+
+        return Ok(sonuc);
+    }
+
     [HttpDelete("sil")]
     public async Task<IActionResult> Sil([FromQuery] string dosyaYolu, CancellationToken cancellationToken)
     {
@@ -64,8 +85,11 @@ public class DosyalarController : ControllerBase
 
     private static void DosyayiDogrula(IFormFile? dosya)
     {
-        if (dosya is null) throw new ArgumentException("Yüklenecek dosya bulunamadı.");
-        if (dosya.Length <= 0) throw new ArgumentException("Boş dosya yüklenemez.");
+        if (dosya is null)
+            throw new IsKuraliException("Yüklenecek dosya bulunamadı.");
+
+        if (dosya.Length <= 0)
+            throw new IsKuraliException("Boş dosya yüklenemez.");
     }
 
     private static DosyaYukleDto DosyaDtoOlustur(IFormFile dosya, Stream dosyaAkisi)

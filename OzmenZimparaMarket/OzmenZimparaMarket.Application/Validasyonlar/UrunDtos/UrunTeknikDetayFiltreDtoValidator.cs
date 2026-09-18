@@ -7,10 +7,22 @@ public class UrunTeknikDetayFiltreDtoValidator : AbstractValidator<UrunTeknikDet
 {
     public UrunTeknikDetayFiltreDtoValidator()
     {
-        RuleFor(x => x.UrunDetayTanimiId).GreaterThan(0).WithMessage("Ürün detay tanımı ID değeri sıfırdan büyük olmalıdır.");
+        RuleFor(x => x.UrunDetayTanimiId)
+            .GreaterThan(0)
+            .WithMessage("Ürün detay tanımı ID değeri sıfırdan büyük olmalıdır.");
 
-        RuleFor(x => x.Degerler).NotNull().WithMessage("Teknik detay değerleri gönderilmelidir.").NotEmpty().WithMessage("En az bir teknik detay değeri seçilmelidir.");
+        RuleFor(x => x.Degerler)
+            .NotNull()
+            .WithMessage("Teknik detay değerleri gönderilmelidir.")
+            .NotEmpty()
+            .WithMessage("En az bir teknik detay değeri seçilmelidir.")
+            .Must(x => x is null || x.Count <= 50)
+            .WithMessage("Bir teknik detay filtresinde en fazla 50 değer seçilebilir.");
 
-        RuleForEach(x => x.Degerler).NotEmpty().WithMessage("Teknik detay değeri boş olamaz.").MaximumLength(500).WithMessage("Teknik detay değeri en fazla 500 karakter olabilir.");
+        RuleForEach(x => x.Degerler)
+            .NotEmpty()
+            .WithMessage("Teknik detay değeri boş olamaz.")
+            .MaximumLength(200)
+            .WithMessage("Teknik detay değeri en fazla 200 karakter olabilir.");
     }
 }

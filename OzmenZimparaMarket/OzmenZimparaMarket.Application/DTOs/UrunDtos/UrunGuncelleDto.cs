@@ -29,4 +29,6 @@ public class UrunGuncelleDto
     public int SiraNo { get; set; }
 
     public bool AktifMi { get; set; }
+
+    public List<UrunTeknikDetayKaydetDto> TeknikDetaylar { get; set; } = [];
 }

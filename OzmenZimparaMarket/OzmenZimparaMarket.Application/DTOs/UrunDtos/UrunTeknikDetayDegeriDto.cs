@@ -7,4 +7,6 @@ public class UrunTeknikDetayDegeriDto
     public string DetayDegeri { get; set; } = string.Empty;
 
     public int SiraNo { get; set; }
+
+    public bool AktifMi { get; set; }
 }

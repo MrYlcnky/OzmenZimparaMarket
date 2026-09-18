@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OzmenZimparaMarket.Application.DTOs.FirmaGenelBilgisiDtos;
 using OzmenZimparaMarket.Application.Interfaces;
+using OzmenZimparaMarket.Application.Istisnalar;
 using OzmenZimparaMarket.Domain.Entityler;
 using OzmenZimparaMarket.Infrastructure.Veritabani;
 
@@ -9,6 +10,7 @@ namespace OzmenZimparaMarket.Infrastructure.Servisler;
 public class FirmaGenelBilgisiServisi : IFirmaGenelBilgisiServisi
 {
     private const int FirmaKaydiId = 1;
+
     private readonly OzmenZimparaMarketDbContext _dbContext;
     private readonly IHtmlTemizlemeServisi _htmlTemizlemeServisi;
 
@@ -20,26 +22,31 @@ public class FirmaGenelBilgisiServisi : IFirmaGenelBilgisiServisi
 
     public async Task<FirmaGenelBilgisiListeDto> GetirAsync(CancellationToken cancellationToken = default)
     {
-        var firma = await _dbContext.FirmaGenelBilgileri.AsNoTracking().FirstOrDefaultAsync(x => x.Id == FirmaKaydiId, cancellationToken);
+        var firma = await _dbContext.FirmaGenelBilgileri
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == FirmaKaydiId, cancellationToken);
 
-        if (firma is null) throw new InvalidOperationException("Firma genel bilgileri bulunamadı.");
+        if (firma is null)
+            throw new KaynakBulunamadiException("Firma genel bilgileri bulunamadı.");
 
         return DtoyaDonustur(firma);
     }
 
     public async Task<FirmaGenelBilgisiListeDto> GuncelleAsync(FirmaGenelBilgisiGuncelleDto dto, CancellationToken cancellationToken = default)
     {
-        var firma = await _dbContext.FirmaGenelBilgileri.FirstOrDefaultAsync(x => x.Id == FirmaKaydiId, cancellationToken);
+        var firma = await _dbContext.FirmaGenelBilgileri
+            .FirstOrDefaultAsync(x => x.Id == FirmaKaydiId, cancellationToken);
 
-        if (firma is null) throw new InvalidOperationException("Firma genel bilgileri bulunamadı.");
+        if (firma is null)
+            throw new KaynakBulunamadiException("Firma genel bilgileri bulunamadı.");
 
         firma.SirketAdi = dto.SirketAdi.Trim();
-        firma.Hakkimizda = _htmlTemizlemeServisi.Temizle(dto.Hakkimizda);
-        firma.Vizyonumuz = _htmlTemizlemeServisi.Temizle(dto.Vizyonumuz);
-        firma.Misyonumuz = _htmlTemizlemeServisi.Temizle(dto.Misyonumuz);
-        firma.Stratejimiz = _htmlTemizlemeServisi.Temizle(dto.Stratejimiz);
-        firma.KalitePolitikamiz = _htmlTemizlemeServisi.Temizle(dto.KalitePolitikamiz);
-        firma.Kvkk = _htmlTemizlemeServisi.Temizle(dto.Kvkk);
+        firma.Hakkimizda = ZorunluHtmlTemizle(dto.Hakkimizda, "Hakkımızda");
+        firma.Vizyonumuz = ZorunluHtmlTemizle(dto.Vizyonumuz, "Vizyon");
+        firma.Misyonumuz = ZorunluHtmlTemizle(dto.Misyonumuz, "Misyon");
+        firma.Stratejimiz = ZorunluHtmlTemizle(dto.Stratejimiz, "Strateji");
+        firma.KalitePolitikamiz = ZorunluHtmlTemizle(dto.KalitePolitikamiz, "Kalite politikası");
+        firma.Kvkk = ZorunluHtmlTemizle(dto.Kvkk, "KVKK");
         firma.IletisimNo = dto.IletisimNo.Trim();
         firma.WhatsappNo = dto.WhatsappNo.Trim();
         firma.Eposta = dto.Eposta.Trim();
@@ -53,6 +60,16 @@ public class FirmaGenelBilgisiServisi : IFirmaGenelBilgisiServisi
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         return DtoyaDonustur(firma);
+    }
+
+    private string ZorunluHtmlTemizle(string html, string alanAdi)
+    {
+        var temizHtml = _htmlTemizlemeServisi.Temizle(html);
+
+        if (string.IsNullOrWhiteSpace(temizHtml))
+            throw new IsKuraliException($"{alanAdi} alanı geçerli bir içerik içermelidir.");
+
+        return temizHtml;
     }
 
     private static FirmaGenelBilgisiListeDto DtoyaDonustur(FirmaGenelBilgisi firma)

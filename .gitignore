@@ -6,14 +6,29 @@
 # .NET
 **/bin/
 **/obj/
+**/publish/
 
-# Env
+# Visual Studio / IDE
+**/.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.csproj.user
+
+# Temporary / backup files
+*.tmp
+*.bak
+*.Backup.*
+*.backup
+
+# Environment / secrets
 .env
 .env.*
 
-# IDE
-.vscode/
-.idea/
-
 # Logs
 *.log
+
+# Runtime uploaded files
+**/wwwroot/uploads/*
+!**/wwwroot/uploads/.gitkeep

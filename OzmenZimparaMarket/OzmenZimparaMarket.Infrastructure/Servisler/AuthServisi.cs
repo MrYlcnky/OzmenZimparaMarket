@@ -2,7 +2,7 @@
 using OzmenZimparaMarket.Application.DTOs.AuthDtos;
 using OzmenZimparaMarket.Application.Interfaces;
 using OzmenZimparaMarket.Infrastructure.Veritabani;
-
+using OzmenZimparaMarket.Application.Istisnalar;
 namespace OzmenZimparaMarket.Infrastructure.Servisler;
 
 public class AuthServisi : IAuthServisi
@@ -22,9 +22,12 @@ public class AuthServisi : IAuthServisi
     {
         var kullaniciAdi = dto.KullaniciAdi.Trim();
 
-        var kullanici = await _dbContext.PanelKullanicilari.AsNoTracking().FirstOrDefaultAsync(x => x.KullaniciAdi == kullaniciAdi, cancellationToken);
+        var kullanici = await _dbContext.PanelKullanicilari
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.KullaniciAdi == kullaniciAdi, cancellationToken);
 
-        if (kullanici is null || !kullanici.AktifMi || !_sifreHashServisi.Dogrula(dto.Sifre, kullanici.SifreHash)) throw new UnauthorizedAccessException("Kullanıcı adı veya şifre hatalıdır.");
+        if (kullanici is null || !kullanici.AktifMi || !_sifreHashServisi.Dogrula(dto.Sifre, kullanici.SifreHash))
+            throw new YetkisizErisimException("Kullanıcı adı veya şifre hatalıdır.");
 
         var tokenSonucu = _jwtServisi.TokenOlustur(kullanici.Id, kullanici.KullaniciAdi, kullanici.AdSoyad);
 

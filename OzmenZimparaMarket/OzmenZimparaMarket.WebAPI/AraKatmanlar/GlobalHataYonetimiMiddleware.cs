@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using OzmenZimparaMarket.Application.Istisnalar;
 using OzmenZimparaMarket.WebAPI.Modeller;
 
 namespace OzmenZimparaMarket.WebAPI.AraKatmanlar;
@@ -20,11 +21,21 @@ public class GlobalHataYonetimiMiddleware
         {
             await _next(context);
         }
+        catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
+        {
+            _logger.LogDebug(
+                "İstemci isteği iptal etti. Takip kodu: {TakipKodu}",
+                context.TraceIdentifier);
+        }
         catch (Exception exception)
         {
             if (context.Response.HasStarted)
             {
-                _logger.LogWarning(exception, "HTTP cevabı başladıktan sonra bir hata oluştu.");
+                _logger.LogWarning(
+                    exception,
+                    "HTTP cevabı başladıktan sonra bir hata oluştu. Takip kodu: {TakipKodu}",
+                    context.TraceIdentifier);
+
                 throw;
             }
 
@@ -48,8 +59,8 @@ public class GlobalHataYonetimiMiddleware
         else
         {
             _logger.LogWarning(
-                exception,
-                "API isteği hata ile sonuçlandı. Durum kodu: {DurumKodu}, takip kodu: {TakipKodu}",
+                "API isteği hata ile sonuçlandı. Hata türü: {HataTuru}, durum kodu: {DurumKodu}, takip kodu: {TakipKodu}",
+                exception.GetType().Name,
                 durumKodu,
                 context.TraceIdentifier);
         }
@@ -74,10 +85,10 @@ public class GlobalHataYonetimiMiddleware
         return exception switch
         {
             ValidationException => StatusCodes.Status400BadRequest,
-            ArgumentException => StatusCodes.Status400BadRequest,
-            UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
-            KeyNotFoundException => StatusCodes.Status404NotFound,
-            InvalidOperationException => StatusCodes.Status409Conflict,
+            IsKuraliException => StatusCodes.Status400BadRequest,
+            YetkisizErisimException => StatusCodes.Status401Unauthorized,
+            KaynakBulunamadiException => StatusCodes.Status404NotFound,
+            CakismaException => StatusCodes.Status409Conflict,
             _ => StatusCodes.Status500InternalServerError
         };
     }
@@ -87,22 +98,26 @@ public class GlobalHataYonetimiMiddleware
         return exception switch
         {
             ValidationException => "Gönderilen bilgiler doğrulanamadı.",
-            ArgumentException => exception.Message,
-            UnauthorizedAccessException => exception.Message,
-            KeyNotFoundException => exception.Message,
-            InvalidOperationException => exception.Message,
+            IsKuraliException => exception.Message,
+            YetkisizErisimException => exception.Message,
+            KaynakBulunamadiException => exception.Message,
+            CakismaException => exception.Message,
             _ => "İşlem sırasında beklenmeyen bir sunucu hatası oluştu."
         };
     }
 
     private static Dictionary<string, string[]>? ValidationHatalariniGetir(Exception exception)
     {
-        if (exception is not ValidationException validationException) return null;
+        if (exception is not ValidationException validationException)
+            return null;
 
         return validationException.Errors
             .GroupBy(x => x.PropertyName)
             .ToDictionary(
                 grup => grup.Key,
-                grup => grup.Select(x => x.ErrorMessage).Distinct().ToArray());
+                grup => grup
+                    .Select(x => x.ErrorMessage)
+                    .Distinct()
+                    .ToArray());
     }
 }

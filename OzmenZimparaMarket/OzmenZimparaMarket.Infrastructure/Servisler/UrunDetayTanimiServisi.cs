@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OzmenZimparaMarket.Application.DTOs.UrunDetayTanimiDtos;
 using OzmenZimparaMarket.Application.Interfaces;
+using OzmenZimparaMarket.Application.Istisnalar;
 using OzmenZimparaMarket.Domain.Entityler;
 using OzmenZimparaMarket.Infrastructure.Veritabani;
 
@@ -39,7 +40,9 @@ public class UrunDetayTanimiServisi : IUrunDetayTanimiServisi
 
     public async Task<UrunDetayTanimiListeDto?> IdIleGetirAsync(int id, CancellationToken cancellationToken = default)
     {
-        var detayTanimi = await _dbContext.UrunDetayTanimlari.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+        var detayTanimi = await _dbContext.UrunDetayTanimlari
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
         return detayTanimi is null ? null : DtoyaDonustur(detayTanimi);
     }
@@ -48,7 +51,8 @@ public class UrunDetayTanimiServisi : IUrunDetayTanimiServisi
     {
         var detayAdi = dto.DetayAdi.Trim();
 
-        if (await DetayAdiKullaniliyorMuAsync(detayAdi, null, cancellationToken)) throw new InvalidOperationException("Bu detay adı daha önce kullanılmıştır.");
+        if (await DetayAdiKullaniliyorMuAsync(detayAdi, null, cancellationToken))
+            throw new CakismaException("Bu detay adı daha önce kullanılmıştır.");
 
         var detayTanimi = new UrunDetayTanimi
         {
@@ -68,13 +72,16 @@ public class UrunDetayTanimiServisi : IUrunDetayTanimiServisi
 
     public async Task<UrunDetayTanimiListeDto> GuncelleAsync(int id, UrunDetayTanimiGuncelleDto dto, CancellationToken cancellationToken = default)
     {
-        var detayTanimi = await _dbContext.UrunDetayTanimlari.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+        var detayTanimi = await _dbContext.UrunDetayTanimlari
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-        if (detayTanimi is null) throw new KeyNotFoundException("Güncellenecek ürün detay tanımı bulunamadı.");
+        if (detayTanimi is null)
+            throw new KaynakBulunamadiException("Güncellenecek ürün detay tanımı bulunamadı.");
 
         var detayAdi = dto.DetayAdi.Trim();
 
-        if (await DetayAdiKullaniliyorMuAsync(detayAdi, id, cancellationToken)) throw new InvalidOperationException("Bu detay adı başka bir ürün detay tanımı tarafından kullanılıyor.");
+        if (await DetayAdiKullaniliyorMuAsync(detayAdi, id, cancellationToken))
+            throw new CakismaException("Bu detay adı başka bir ürün detay tanımı tarafından kullanılıyor.");
 
         if (detayTanimi.CokluDegerMi && !dto.CokluDegerMi)
         {
@@ -84,7 +91,8 @@ public class UrunDetayTanimiServisi : IUrunDetayTanimiServisi
                 .GroupBy(x => x.UrunId)
                 .AnyAsync(x => x.Count() > 1, cancellationToken);
 
-            if (birdenFazlaDegeriOlanUrunVarMi) throw new InvalidOperationException("Bu detay tanımını kullanan bazı ürünlerde birden fazla değer bulunmaktadır. Çoklu değer özelliği kapatılamaz.");
+            if (birdenFazlaDegeriOlanUrunVarMi)
+                throw new IsKuraliException("Bu detay tanımını kullanan bazı ürünlerde birden fazla değer bulunmaktadır. Çoklu değer özelliği kapatılamaz.");
         }
 
         detayTanimi.DetayAdi = detayAdi;
@@ -101,23 +109,31 @@ public class UrunDetayTanimiServisi : IUrunDetayTanimiServisi
 
     public async Task SilAsync(int id, CancellationToken cancellationToken = default)
     {
-        var detayTanimi = await _dbContext.UrunDetayTanimlari.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+        var detayTanimi = await _dbContext.UrunDetayTanimlari
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-        if (detayTanimi is null) throw new KeyNotFoundException("Silinecek ürün detay tanımı bulunamadı.");
+        if (detayTanimi is null)
+            throw new KaynakBulunamadiException("Silinecek ürün detay tanımı bulunamadı.");
 
-        var kullaniliyorMu = await _dbContext.UrunDetaylari.AsNoTracking().AnyAsync(x => x.UrunDetayTanimiId == id, cancellationToken);
+        var kullaniliyorMu = await _dbContext.UrunDetaylari
+            .AsNoTracking()
+            .AnyAsync(x => x.UrunDetayTanimiId == id, cancellationToken);
 
-        if (kullaniliyorMu) throw new InvalidOperationException("Ürünlerde kullanılan detay tanımı silinemez. Bunun yerine detay tanımını pasife alabilirsiniz.");
+        if (kullaniliyorMu)
+            throw new IsKuraliException("Ürünlerde kullanılan detay tanımı silinemez. Bunun yerine detay tanımını pasife alabilirsiniz.");
 
         _dbContext.UrunDetayTanimlari.Remove(detayTanimi);
+
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<UrunDetayTanimiListeDto> DurumDegistirAsync(int id, bool aktifMi, CancellationToken cancellationToken = default)
     {
-        var detayTanimi = await _dbContext.UrunDetayTanimlari.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+        var detayTanimi = await _dbContext.UrunDetayTanimlari
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-        if (detayTanimi is null) throw new KeyNotFoundException("Ürün detay tanımı bulunamadı.");
+        if (detayTanimi is null)
+            throw new KaynakBulunamadiException("Ürün detay tanımı bulunamadı.");
 
         detayTanimi.AktifMi = aktifMi;
 
@@ -128,9 +144,12 @@ public class UrunDetayTanimiServisi : IUrunDetayTanimiServisi
 
     private async Task<bool> DetayAdiKullaniliyorMuAsync(string detayAdi, int? haricDetayTanimiId, CancellationToken cancellationToken)
     {
-        var sorgu = _dbContext.UrunDetayTanimlari.AsNoTracking().Where(x => x.DetayAdi == detayAdi);
+        var sorgu = _dbContext.UrunDetayTanimlari
+            .AsNoTracking()
+            .Where(x => x.DetayAdi == detayAdi);
 
-        if (haricDetayTanimiId.HasValue) sorgu = sorgu.Where(x => x.Id != haricDetayTanimiId.Value);
+        if (haricDetayTanimiId.HasValue)
+            sorgu = sorgu.Where(x => x.Id != haricDetayTanimiId.Value);
 
         return await sorgu.AnyAsync(cancellationToken);
     }

@@ -36,6 +36,8 @@ public class UrunListeDto
 
     public bool AktifMi { get; set; }
 
+    public int TeknikDetaySayisi { get; set; }
+
     public DateTime OlusturmaTarihi { get; set; }
 
     public DateTime? GuncellemeTarihi { get; set; }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using OzmenZimparaMarket.Application.DTOs.UrunDetayiDtos;
 using OzmenZimparaMarket.Application.Interfaces;
+using OzmenZimparaMarket.Application.Istisnalar;
 
 namespace OzmenZimparaMarket.WebAPI.Controllers;
 
@@ -38,7 +39,8 @@ public class UrunDetaylariController : ControllerBase
     {
         var detay = await _urunDetayiServisi.IdIleGetirAsync(id, cancellationToken);
 
-        if (detay is null) throw new KeyNotFoundException("Ürün detay değeri bulunamadı.");
+        if (detay is null)
+            throw new KaynakBulunamadiException("Ürün detay değeri bulunamadı.");
 
         return Ok(detay);
     }
@@ -60,9 +62,12 @@ public class UrunDetaylariController : ControllerBase
     }
 
     [HttpPatch("durum-degistir/{id:int}")]
-    public async Task<IActionResult> DurumDegistir(int id, [FromQuery] bool aktifMi, CancellationToken cancellationToken)
+    public async Task<IActionResult> DurumDegistir(int id, [FromQuery] bool? aktifMi, CancellationToken cancellationToken)
     {
-        var detay = await _urunDetayiServisi.DurumDegistirAsync(id, aktifMi, cancellationToken);
+        if (!aktifMi.HasValue)
+            throw new IsKuraliException("Aktiflik durumu belirtilmelidir.");
+
+        var detay = await _urunDetayiServisi.DurumDegistirAsync(id, aktifMi.Value, cancellationToken);
 
         return Ok(detay);
     }

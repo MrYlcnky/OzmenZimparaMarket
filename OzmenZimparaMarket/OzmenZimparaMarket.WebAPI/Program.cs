@@ -1,5 +1,3 @@
-using System.Text;
-using System.Threading.RateLimiting;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
@@ -9,12 +7,32 @@ using Microsoft.OpenApi;
 using OzmenZimparaMarket.Application.Interfaces;
 using OzmenZimparaMarket.Infrastructure;
 using OzmenZimparaMarket.Infrastructure.Ayarlar;
+using OzmenZimparaMarket.Infrastructure.Veritabani;
 using OzmenZimparaMarket.WebAPI.AraKatmanlar;
-using OzmenZimparaMarket.WebAPI.Modeller;
 using OzmenZimparaMarket.WebAPI.Filtreler;
+using OzmenZimparaMarket.WebAPI.Modeller;
+using System.Text;
+using System.Threading.RateLimiting;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+var allowedHosts = builder.Configuration["AllowedHosts"];
+
+if (!builder.Environment.IsDevelopment() &&
+    (string.IsNullOrWhiteSpace(allowedHosts) || allowedHosts.Trim() == "*"))
+{
+    throw new InvalidOperationException(
+        "Production ortamında AllowedHosts açıkça tanımlanmalı ve '*' kullanılamaz.");
+}
+
+builder.Services.AddHsts(options =>
+{
+    options.MaxAge = TimeSpan.FromDays(180);
+    options.IncludeSubDomains = true;
+    options.Preload = false;
+});
+
 
 var webRootDizini = builder.Environment.WebRootPath;
 
@@ -216,11 +234,20 @@ builder.Services.AddRateLimiter(options =>
 var maksimumDosyaBoyutu = builder.Configuration
     .GetValue<long>("Dosya:MaksimumDosyaBoyutu");
 
-if (maksimumDosyaBoyutu <= 0) throw new InvalidOperationException("Maksimum dosya boyutu tanımlanmamıştır.");
+if (maksimumDosyaBoyutu <= 0)
+    throw new InvalidOperationException("Maksimum dosya boyutu tanımlanmamıştır.");
+
+var maksimumIstekBoyutu = checked(
+    maksimumDosyaBoyutu + (1024L * 1024L));
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = maksimumIstekBoyutu;
+});
 
 builder.Services.Configure<FormOptions>(options =>
 {
-    options.MultipartBodyLengthLimit = maksimumDosyaBoyutu;
+    options.MultipartBodyLengthLimit = maksimumIstekBoyutu;
 });
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
@@ -268,8 +295,24 @@ if (app.Environment.IsDevelopment())
             "Özmen Zımpara Market API";
     });
 }
+else
+{
+    app.UseHsts();
+}
 
 app.UseHttpsRedirection();
+
+app.Use(async (context, next) =>
+{
+    context.Response.OnStarting(() =>
+    {
+        context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+
+        return Task.CompletedTask;
+    });
+
+    await next();
+});
 
 app.UseStaticFiles();
 
@@ -280,9 +323,16 @@ app.UseCors("FrontendCors");
 app.UseRateLimiter();
 
 app.UseAuthentication();
-
 app.UseAuthorization();
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var veritabaniBaslaticisi =
+        scope.ServiceProvider.GetRequiredService<VeritabaniBaslaticisi>();
+
+    await veritabaniBaslaticisi.BaslangicVerileriniOlusturAsync();
+}
 
 app.Run();

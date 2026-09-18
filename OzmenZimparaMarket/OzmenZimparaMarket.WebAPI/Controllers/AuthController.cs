@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using OzmenZimparaMarket.Application.DTOs.AuthDtos;
 using OzmenZimparaMarket.Application.Interfaces;
 using OzmenZimparaMarket.WebAPI.Uzantilar;
+using OzmenZimparaMarket.Application.Istisnalar;
 
 namespace OzmenZimparaMarket.WebAPI.Controllers;
 
@@ -36,7 +37,7 @@ public class AuthController : ControllerBase
 
         var kullanici = await _authServisi.MevcutKullaniciyiGetirAsync(kullaniciId, cancellationToken);
 
-        if (kullanici is null) throw new UnauthorizedAccessException("Oturum sahibi kullanıcı bulunamadı veya kullanıcı pasif durumdadır.");
+        if (kullanici is null) throw new YetkisizErisimException("Oturum sahibi kullanıcı bulunamadı veya kullanıcı pasif durumdadır.");
 
         return Ok(kullanici);
     }

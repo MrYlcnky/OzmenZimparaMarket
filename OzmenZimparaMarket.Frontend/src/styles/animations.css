@@ -1,0 +1,12 @@
+@media (prefers-reduced-motion: reduce) {
+  *:not(.Toastify__progress-bar),
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+
+  *:not(.Toastify__progress-bar) {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

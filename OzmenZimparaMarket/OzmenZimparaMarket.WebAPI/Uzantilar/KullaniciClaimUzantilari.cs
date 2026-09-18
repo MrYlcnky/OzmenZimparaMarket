@@ -1,4 +1,5 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using OzmenZimparaMarket.Application.Istisnalar;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace OzmenZimparaMarket.WebAPI.Uzantilar;
@@ -10,7 +11,7 @@ public static class KullaniciClaimUzantilari
         var kullaniciIdDegeri = kullanici.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
                                ?? kullanici.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (!int.TryParse(kullaniciIdDegeri, out var kullaniciId) || kullaniciId <= 0) throw new UnauthorizedAccessException("Oturum bilgisi geçersizdir.");
+        if (!int.TryParse(kullaniciIdDegeri, out var kullaniciId) || kullaniciId <= 0) throw new YetkisizErisimException("Oturum bilgisi geçersizdir.");
 
         return kullaniciId;
     }

@@ -20,6 +20,7 @@ public interface IUrunServisi
     Task<UrunListeDto> EkleAsync(UrunEkleDto dto, CancellationToken cancellationToken = default);
 
     Task<UrunListeDto> GuncelleAsync(int id, UrunGuncelleDto dto, CancellationToken cancellationToken = default);
+    Task<UrunTopluSilSonucDto> TopluSilAsync( UrunTopluSilDto dto, CancellationToken cancellationToken = default);
 
     Task SilAsync(int id, CancellationToken cancellationToken = default);
 

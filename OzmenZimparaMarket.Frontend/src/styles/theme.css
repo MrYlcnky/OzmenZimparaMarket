@@ -1,0 +1,63 @@
+@theme {
+  /* Font */
+  --font-sans:
+    "Manrope Variable", ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  /* Marka renkleri */
+  --color-brand-black: #090a0f;
+
+  --color-brand-blue: #2563eb;
+  --color-brand-blue-light: #3b82f6;
+  --color-brand-blue-dark: #1d4ed8;
+
+  --color-brand-purple: #7c3aed;
+  --color-brand-purple-light: #8b5cf6;
+  --color-brand-purple-dark: #6d28d9;
+
+  /* Çok sınırlı vurgu için */
+  --color-brand-red: #ef4444;
+
+  /* Açık yüzeyler */
+  --color-surface: #ffffff;
+  --color-surface-soft: #f7f8fa;
+  --color-surface-muted: #eef0f4;
+
+  /* Koyu yüzeyler */
+  --color-surface-dark: #12141b;
+  --color-surface-dark-soft: #1a1d27;
+
+  /* Yazılar */
+  --color-text-primary: #18181b;
+  --color-text-secondary: #52525b;
+  --color-text-muted: #71717a;
+
+  --color-text-light: #f8fafc;
+  --color-text-light-muted: #a1a1aa;
+
+  /* Kenarlıklar */
+  --color-border: #e4e4e7;
+  --color-border-soft: #f0f0f2;
+  --color-border-dark: #292c36;
+
+  /* Sistem renkleri */
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+
+  /* Köşe yuvarlaklığı */
+  --radius-ui-sm: 0.5rem;
+  --radius-ui: 0.75rem;
+  --radius-ui-lg: 1rem;
+
+  /* Gölgeler */
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px rgb(15 23 42 / 0.06);
+
+  --shadow-card-hover:
+    0 4px 8px rgb(0 0 0 / 0.05), 0 16px 40px rgb(15 23 42 / 0.1);
+
+  --shadow-panel: 0 24px 64px rgb(0 0 0 / 0.16);
+
+  /* Geçiş */
+  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
+}
