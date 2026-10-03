@@ -259,9 +259,11 @@ function UrunOzet({ urun }) {
           )}
         </div>
 
-        <p className="mt-1 text-sm font-semibold text-text-muted">
-          {urun.urunKodu}
-        </p>
+        {urun.urunKodu && (
+          <p className="mt-1 text-sm font-semibold text-text-muted">
+            {urun.urunKodu}
+          </p>
+        )}
 
         <div className="mt-4 flex flex-wrap items-center gap-2">
           <span

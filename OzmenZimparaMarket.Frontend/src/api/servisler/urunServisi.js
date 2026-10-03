@@ -1,5 +1,43 @@
 import apiClient from "../client";
 
+export async function oneCikanUrunleriGetir(adet = 6) {
+  const response = await apiClient.get("/urunler/one-cikanlar", {
+    params: {
+      adet,
+    },
+  });
+
+  return response.data;
+}
+
+export async function urunSeoUrlIleGetir(seoUrl) {
+  const response = await apiClient.get(
+    `/urunler/seo-url/${encodeURIComponent(seoUrl)}`,
+  );
+
+  return response.data;
+}
+
+export async function urunleriFiltrele(filtre = {}) {
+  const response = await apiClient.post("/urunler/filtrele", filtre);
+
+  return response.data;
+}
+
+export async function urunFiltreSecenekleriniGetir(
+  kategoriId = null,
+  altKategorilerDahilMi = true,
+) {
+  const response = await apiClient.get("/urunler/filtre-secenekleri", {
+    params: {
+      kategoriId,
+      altKategorilerDahilMi,
+    },
+  });
+
+  return response.data;
+}
+
 export async function yonetimUrunleriniFiltrele(filtre = {}) {
   const response = await apiClient.post("/urunler/yonetim-filtrele", {
     kategoriId: filtre.kategoriId ?? null,
@@ -42,6 +80,20 @@ export async function urunDurumDegistir(id, aktifMi) {
     {
       params: {
         aktifMi,
+      },
+    },
+  );
+
+  return response.data;
+}
+
+export async function urunOneCikanDurumDegistir(id, oneCikanMi) {
+  const response = await apiClient.patch(
+    `/urunler/one-cikan-degistir/${id}`,
+    null,
+    {
+      params: {
+        oneCikanMi,
       },
     },
   );

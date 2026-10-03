@@ -113,7 +113,7 @@ export function urunPayloadOlustur(form) {
 
     urunAdi: form.urunAdi?.trim() ?? "",
 
-    urunKodu: form.urunKodu?.trim() ?? "",
+    urunKodu: bosMetniNullYap(form.urunKodu),
 
     kisaAciklama: bosMetniNullYap(form.kisaAciklama),
 

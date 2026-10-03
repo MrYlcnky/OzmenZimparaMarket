@@ -46,7 +46,7 @@ function UrunTemelBilgiler({
           />
         </FormAlani>
 
-        <FormAlani label="Ürün Kodu" zorunlu hata={formHatalari.urunKodu}>
+        <FormAlani label="Ürün Kodu" hata={formHatalari.urunKodu}>
           <input
             type="text"
             value={form.urunKodu ?? ""}

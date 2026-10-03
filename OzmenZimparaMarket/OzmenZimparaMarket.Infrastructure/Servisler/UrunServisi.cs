@@ -32,7 +32,9 @@ public class UrunServisi : IUrunServisi
         _logger = logger;
     }
 
-    public async Task<IReadOnlyList<UrunListeDto>> TumunuGetirAsync(bool sadeceAktifler = false, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<UrunListeDto>> TumunuGetirAsync(
+        bool sadeceAktifler = false,
+        CancellationToken cancellationToken = default)
     {
         var sorgu = _dbContext.Urunler
             .AsNoTracking()
@@ -40,11 +42,14 @@ public class UrunServisi : IUrunServisi
 
         if (sadeceAktifler)
         {
-            var etkinAktifKategoriIdleri = await EtkinAktifKategoriIdleriniGetirAsync(cancellationToken);
+            var etkinAktifKategoriIdleri =
+                await EtkinAktifKategoriIdleriniGetirAsync(
+                    cancellationToken);
 
             sorgu = sorgu.Where(x =>
                 x.AktifMi &&
-                etkinAktifKategoriIdleri.Contains(x.KategoriId));
+                etkinAktifKategoriIdleri.Contains(
+                    x.KategoriId));
         }
 
         var urunler = await sorgu
@@ -73,12 +78,15 @@ public class UrunServisi : IUrunServisi
             })
             .ToListAsync(cancellationToken);
 
-        SatisBirimiAdlariniDoldur(urunler);
+        SatisBirimiAdlariniDoldur(
+            urunler);
 
         return urunler;
     }
 
-    public async Task<SayfaliSonucDto<UrunListeDto>> FiltreleAsync(UrunFiltreDto filtre, CancellationToken cancellationToken = default)
+    public async Task<SayfaliSonucDto<UrunListeDto>> FiltreleAsync(
+        UrunFiltreDto filtre,
+        CancellationToken cancellationToken = default)
     {
         var sorgu = _dbContext.Urunler
             .AsNoTracking()
@@ -88,77 +96,119 @@ public class UrunServisi : IUrunServisi
         {
             if (filtre.AltKategorilerDahilMi)
             {
-                var kategoriIdleri = await KategoriVeAltKategoriIdleriniGetirAsync(
-                    filtre.KategoriId.Value,
-                    filtre.AktifMi == true,
-                    cancellationToken);
+                var kategoriIdleri =
+                    await KategoriVeAltKategoriIdleriniGetirAsync(
+                        filtre.KategoriId.Value,
+                        filtre.AktifMi == true,
+                        cancellationToken);
 
-                sorgu = sorgu.Where(x => kategoriIdleri.Contains(x.KategoriId));
+                sorgu = sorgu.Where(x =>
+                    kategoriIdleri.Contains(
+                        x.KategoriId));
             }
             else
             {
-                sorgu = sorgu.Where(x => x.KategoriId == filtre.KategoriId.Value);
+                sorgu = sorgu.Where(x =>
+                    x.KategoriId ==
+                    filtre.KategoriId.Value);
             }
         }
 
-        if (!string.IsNullOrWhiteSpace(filtre.AramaMetni))
+        if (!string.IsNullOrWhiteSpace(
+                filtre.AramaMetni))
         {
-            var aramaMetni = filtre.AramaMetni.Trim();
+            var aramaMetni =
+                filtre.AramaMetni.Trim();
 
             sorgu = sorgu.Where(x =>
                 x.UrunAdi.Contains(aramaMetni) ||
-                x.UrunKodu.Contains(aramaMetni) ||
-                (x.KisaAciklama != null && x.KisaAciklama.Contains(aramaMetni)) ||
-                (x.DetayliAciklama != null && x.DetayliAciklama.Contains(aramaMetni)) ||
-                x.UrunDetaylari.Any(y => y.DetayDegeri.Contains(aramaMetni)));
+                (x.UrunKodu != null &&
+                 x.UrunKodu.Contains(aramaMetni)) ||
+                (x.KisaAciklama != null &&
+                 x.KisaAciklama.Contains(aramaMetni)) ||
+                (x.DetayliAciklama != null &&
+                 x.DetayliAciklama.Contains(aramaMetni)) ||
+                x.UrunDetaylari.Any(y =>
+                    y.DetayDegeri.Contains(
+                        aramaMetni)));
         }
 
         if (filtre.AktifMi.HasValue)
         {
-            sorgu = sorgu.Where(x => x.AktifMi == filtre.AktifMi.Value);
+            sorgu = sorgu.Where(x =>
+                x.AktifMi ==
+                filtre.AktifMi.Value);
 
             if (filtre.AktifMi.Value)
             {
-                var etkinAktifKategoriIdleri = await EtkinAktifKategoriIdleriniGetirAsync(cancellationToken);
+                var etkinAktifKategoriIdleri =
+                    await EtkinAktifKategoriIdleriniGetirAsync(
+                        cancellationToken);
 
-                sorgu = sorgu.Where(x => etkinAktifKategoriIdleri.Contains(x.KategoriId));
+                sorgu = sorgu.Where(x =>
+                    etkinAktifKategoriIdleri.Contains(
+                        x.KategoriId));
             }
         }
 
         if (filtre.OneCikanMi.HasValue)
-            sorgu = sorgu.Where(x => x.OneCikanMi == filtre.OneCikanMi.Value);
+        {
+            sorgu = sorgu.Where(x =>
+                x.OneCikanMi ==
+                filtre.OneCikanMi.Value);
+        }
 
         if (filtre.SatisBirimi.HasValue)
-            sorgu = sorgu.Where(x => x.SatisBirimi == filtre.SatisBirimi.Value);
-
-        foreach (var teknikFiltre in filtre.TeknikDetayFiltreleri)
         {
-            var detayTanimiId = teknikFiltre.UrunDetayTanimiId;
+            sorgu = sorgu.Where(x =>
+                x.SatisBirimi ==
+                filtre.SatisBirimi.Value);
+        }
 
-            var degerler = teknikFiltre.Degerler
-                .Where(x => !string.IsNullOrWhiteSpace(x))
-                .Select(x => x.Trim())
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToList();
+        foreach (var teknikFiltre in
+                 filtre.TeknikDetayFiltreleri)
+        {
+            var detayTanimiId =
+                teknikFiltre.UrunDetayTanimiId;
+
+            var degerler =
+                teknikFiltre.Degerler
+                    .Where(x =>
+                        !string.IsNullOrWhiteSpace(x))
+                    .Select(x =>
+                        x.Trim())
+                    .Distinct(
+                        StringComparer.OrdinalIgnoreCase)
+                    .ToList();
 
             if (degerler.Count == 0)
                 continue;
 
             sorgu = sorgu.Where(x =>
                 x.UrunDetaylari.Any(y =>
-                    y.UrunDetayTanimiId == detayTanimiId &&
+                    y.UrunDetayTanimiId ==
+                    detayTanimiId &&
                     y.AktifMi &&
                     y.UrunDetayTanimi.AktifMi &&
-                    degerler.Contains(y.DetayDegeri)));
+                    degerler.Contains(
+                        y.DetayDegeri)));
         }
 
-        var toplamKayitSayisi = await sorgu.CountAsync(cancellationToken);
+        var toplamKayitSayisi =
+            await sorgu.CountAsync(
+                cancellationToken);
 
-        sorgu = SiralamaUygula(sorgu, filtre.Siralama);
+        sorgu =
+            SiralamaUygula(
+                sorgu,
+                filtre.Siralama);
 
         var urunler = await sorgu
-            .Skip((filtre.SayfaNo - 1) * filtre.SayfaBoyutu)
-            .Take(filtre.SayfaBoyutu)
+            .Skip(
+                (filtre.SayfaNo - 1) *
+                filtre.SayfaBoyutu)
+            .Take(
+                filtre.SayfaBoyutu)
             .Select(x => new UrunListeDto
             {
                 Id = x.Id,
@@ -176,31 +226,52 @@ public class UrunServisi : IUrunServisi
                 OneCikanMi = x.OneCikanMi,
                 SiraNo = x.SiraNo,
                 AktifMi = x.AktifMi,
-                TeknikDetaySayisi = x.UrunDetaylari.Count,
-                OlusturmaTarihi = x.OlusturmaTarihi,
-                GuncellemeTarihi = x.GuncellemeTarihi
+                TeknikDetaySayisi =
+                    x.UrunDetaylari.Count,
+                OlusturmaTarihi =
+                    x.OlusturmaTarihi,
+                GuncellemeTarihi =
+                    x.GuncellemeTarihi
             })
-            .ToListAsync(cancellationToken);
+            .ToListAsync(
+                cancellationToken);
 
-        SatisBirimiAdlariniDoldur(urunler);
+        SatisBirimiAdlariniDoldur(
+            urunler);
+
+        await UrunListeTeknikDetaylariniDoldurAsync(
+            urunler,
+            cancellationToken);
 
         return new SayfaliSonucDto<UrunListeDto>
         {
-            Kayitlar = urunler,
-            SayfaNo = filtre.SayfaNo,
-            SayfaBoyutu = filtre.SayfaBoyutu,
-            ToplamKayitSayisi = toplamKayitSayisi,
-            ToplamSayfaSayisi = (int)Math.Ceiling(
-                toplamKayitSayisi /
-                (double)filtre.SayfaBoyutu)
+            Kayitlar =
+                urunler,
+
+            SayfaNo =
+                filtre.SayfaNo,
+
+            SayfaBoyutu =
+                filtre.SayfaBoyutu,
+
+            ToplamKayitSayisi =
+                toplamKayitSayisi,
+
+            ToplamSayfaSayisi =
+                (int)Math.Ceiling(
+                    toplamKayitSayisi /
+                    (double)filtre.SayfaBoyutu)
         };
     }
 
-    public async Task<UrunDetayGoruntuleDto?> IdIleGetirAsync(int id, CancellationToken cancellationToken = default)
+    public async Task<UrunDetayGoruntuleDto?> IdIleGetirAsync(
+        int id,
+        CancellationToken cancellationToken = default)
     {
         var sorgu = _dbContext.Urunler
             .AsNoTracking()
-            .Where(x => x.Id == id);
+            .Where(x =>
+                x.Id == id);
 
         return await UrunDetayiniGetirAsync(
             sorgu,
@@ -208,24 +279,32 @@ public class UrunServisi : IUrunServisi
             cancellationToken);
     }
 
-    public async Task<UrunDetayGoruntuleDto?> SeoUrlIleGetirAsync(string seoUrl, CancellationToken cancellationToken = default)
+    public async Task<UrunDetayGoruntuleDto?> SeoUrlIleGetirAsync(
+        string seoUrl,
+        CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(seoUrl))
+        if (string.IsNullOrWhiteSpace(
+                seoUrl))
+        {
             return null;
+        }
 
-        var temizSeoUrl = seoUrl
-            .Trim()
-            .ToLowerInvariant();
+        var temizSeoUrl =
+            seoUrl
+                .Trim()
+                .ToLowerInvariant();
 
         var etkinAktifKategoriIdleri =
-            await EtkinAktifKategoriIdleriniGetirAsync(cancellationToken);
+            await EtkinAktifKategoriIdleriniGetirAsync(
+                cancellationToken);
 
         var sorgu = _dbContext.Urunler
             .AsNoTracking()
             .Where(x =>
                 x.SeoUrl == temizSeoUrl &&
                 x.AktifMi &&
-                etkinAktifKategoriIdleri.Contains(x.KategoriId));
+                etkinAktifKategoriIdleri.Contains(
+                    x.KategoriId));
 
         return await UrunDetayiniGetirAsync(
             sorgu,
@@ -233,68 +312,87 @@ public class UrunServisi : IUrunServisi
             cancellationToken);
     }
 
-    public async Task<IReadOnlyList<UrunListeDto>> OneCikanlariGetirAsync(int adet = 8, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<UrunListeDto>> OneCikanlariGetirAsync( int adet = 8, CancellationToken cancellationToken = default)
     {
         if (adet <= 0)
-            throw new IsKuraliException("Ürün adedi sıfırdan büyük olmalıdır.");
+        {
+            throw new IsKuraliException(
+                "Ürün adedi sıfırdan büyük olmalıdır.");
+        }
 
         if (adet > 50)
             adet = 50;
 
         var etkinAktifKategoriIdleri =
-            await EtkinAktifKategoriIdleriniGetirAsync(cancellationToken);
+            await EtkinAktifKategoriIdleriniGetirAsync(
+                cancellationToken);
 
-        var urunler = await _dbContext.Urunler
-            .AsNoTracking()
-            .Where(x =>
-                x.OneCikanMi &&
-                x.AktifMi &&
-                etkinAktifKategoriIdleri.Contains(x.KategoriId))
-            .OrderBy(x => x.SiraNo)
-            .ThenBy(x => x.UrunAdi)
-            .Take(adet)
-            .Select(x => new UrunListeDto
-            {
-                Id = x.Id,
-                KategoriId = x.KategoriId,
-                KategoriAdi = x.Kategori.KategoriAdi,
-                UrunAdi = x.UrunAdi,
-                UrunKodu = x.UrunKodu,
-                KisaAciklama = x.KisaAciklama,
-                DetayliAciklama = x.DetayliAciklama,
-                GorselYolu = x.GorselYolu,
-                SatisBirimi = x.SatisBirimi,
-                SeoUrl = x.SeoUrl,
-                SeoBasligi = x.SeoBasligi,
-                SeoAciklamasi = x.SeoAciklamasi,
-                OneCikanMi = x.OneCikanMi,
-                SiraNo = x.SiraNo,
-                AktifMi = x.AktifMi,
-                TeknikDetaySayisi = x.UrunDetaylari.Count,
-                OlusturmaTarihi = x.OlusturmaTarihi,
-                GuncellemeTarihi = x.GuncellemeTarihi
-            })
-            .ToListAsync(cancellationToken);
+        var urunler =
+            await _dbContext.Urunler
+                .AsNoTracking()
+                .Where(x =>
+                    x.OneCikanMi &&
+                    x.AktifMi &&
+                    etkinAktifKategoriIdleri.Contains(
+                        x.KategoriId))
+                .OrderBy(x =>
+                    x.SiraNo)
+                .ThenBy(x =>
+                    x.UrunAdi)
+                .Take(adet)
+                .Select(x => new UrunListeDto
+                {
+                    Id = x.Id,
+                    KategoriId = x.KategoriId,
+                    KategoriAdi = x.Kategori.KategoriAdi,
+                    UrunAdi = x.UrunAdi,
+                    UrunKodu = x.UrunKodu,
+                    KisaAciklama = x.KisaAciklama,
+                    DetayliAciklama = x.DetayliAciklama,
+                    GorselYolu = x.GorselYolu,
+                    SatisBirimi = x.SatisBirimi,
+                    SeoUrl = x.SeoUrl,
+                    SeoBasligi = x.SeoBasligi,
+                    SeoAciklamasi = x.SeoAciklamasi,
+                    OneCikanMi = x.OneCikanMi,
+                    SiraNo = x.SiraNo,
+                    AktifMi = x.AktifMi,
+                    TeknikDetaySayisi =
+                        x.UrunDetaylari.Count,
+                    OlusturmaTarihi =
+                        x.OlusturmaTarihi,
+                    GuncellemeTarihi =
+                        x.GuncellemeTarihi
+                })
+                .ToListAsync(
+                    cancellationToken);
 
-        SatisBirimiAdlariniDoldur(urunler);
+        SatisBirimiAdlariniDoldur(
+            urunler);
 
         return urunler;
     }
 
-    public async Task<UrunListeDto> EkleAsync(UrunEkleDto dto, CancellationToken cancellationToken = default)
+    public async Task<UrunListeDto> EkleAsync( UrunEkleDto dto, CancellationToken cancellationToken = default)
     {
         await KategoriyiDogrulaAsync(
             dto.KategoriId,
             dto.AktifMi,
             cancellationToken);
 
-        var urunAdi = dto.UrunAdi.Trim();
-        var urunKodu = dto.UrunKodu.Trim();
+        var urunAdi =
+            dto.UrunAdi.Trim();
 
-        var seoUrl = SeoUrlOlustur(
-            string.IsNullOrWhiteSpace(dto.SeoUrl)
-                ? urunAdi
-                : dto.SeoUrl);
+        var urunKodu =
+            Temizle(
+                dto.UrunKodu);
+
+        var seoUrl =
+            SeoUrlOlustur(
+                string.IsNullOrWhiteSpace(
+                    dto.SeoUrl)
+                    ? urunAdi
+                    : dto.SeoUrl);
 
         if (await UrunKoduKullaniliyorMuAsync(
                 urunKodu,
@@ -318,46 +416,78 @@ public class UrunServisi : IUrunServisi
             dto.TeknikDetaylar,
             cancellationToken);
 
-        var urun = new Urun
-        {
-            KategoriId = dto.KategoriId,
-            UrunAdi = urunAdi,
-            UrunKodu = urunKodu,
-            KisaAciklama = Temizle(dto.KisaAciklama),
-            DetayliAciklama =
-                _htmlTemizlemeServisi.Temizle(dto.DetayliAciklama),
-            GorselYolu = Temizle(dto.GorselYolu),
-            SatisBirimi = dto.SatisBirimi,
-            SeoUrl = seoUrl,
-            SeoBasligi = await SeoBasligiOlusturAsync(
-                urunAdi,
-                dto.SeoBasligi,
-                cancellationToken),
-            SeoAciklamasi = SeoAciklamasiOlustur(
-                dto.SeoAciklamasi,
-                dto.KisaAciklama),
-            OneCikanMi = dto.OneCikanMi,
-            SiraNo = dto.SiraNo,
-            AktifMi = dto.AktifMi,
-            OlusturmaTarihi = DateTime.UtcNow
-        };
-
-        foreach (var teknikDetay in dto.TeknikDetaylar)
-        {
-            urun.UrunDetaylari.Add(new UrunDetayi
+        var urun =
+            new Urun
             {
-                UrunDetayTanimiId =
-                    teknikDetay.UrunDetayTanimiId,
+                KategoriId =
+                    dto.KategoriId,
 
-                DetayDegeri =
-                    teknikDetay.DetayDegeri.Trim(),
+                UrunAdi =
+                    urunAdi,
+
+                UrunKodu =
+                    urunKodu,
+
+                KisaAciklama =
+                    Temizle(
+                        dto.KisaAciklama),
+
+                DetayliAciklama =
+                    _htmlTemizlemeServisi.Temizle(
+                        dto.DetayliAciklama),
+
+                GorselYolu =
+                    Temizle(
+                        dto.GorselYolu),
+
+                SatisBirimi =
+                    dto.SatisBirimi,
+
+                SeoUrl =
+                    seoUrl,
+
+                SeoBasligi =
+                    await SeoBasligiOlusturAsync(
+                        urunAdi,
+                        dto.SeoBasligi,
+                        cancellationToken),
+
+                SeoAciklamasi =
+                    SeoAciklamasiOlustur(
+                        dto.SeoAciklamasi,
+                        dto.KisaAciklama),
+
+                OneCikanMi =
+                    dto.OneCikanMi,
 
                 SiraNo =
-                    teknikDetay.SiraNo,
+                    dto.SiraNo,
 
                 AktifMi =
-                    teknikDetay.AktifMi
-            });
+                    dto.AktifMi,
+
+                OlusturmaTarihi =
+                    DateTime.UtcNow
+            };
+
+        foreach (var teknikDetay in
+                 dto.TeknikDetaylar)
+        {
+            urun.UrunDetaylari.Add(
+                new UrunDetayi
+                {
+                    UrunDetayTanimiId =
+                        teknikDetay.UrunDetayTanimiId,
+
+                    DetayDegeri =
+                        teknikDetay.DetayDegeri.Trim(),
+
+                    SiraNo =
+                        teknikDetay.SiraNo,
+
+                    AktifMi =
+                        teknikDetay.AktifMi
+                });
         }
 
         await _dbContext.Urunler.AddAsync(
@@ -374,13 +504,15 @@ public class UrunServisi : IUrunServisi
                    "Eklenen ürün getirilemedi.");
     }
 
-    public async Task<UrunListeDto> GuncelleAsync(int id, UrunGuncelleDto dto, CancellationToken cancellationToken = default)
+    public async Task<UrunListeDto> GuncelleAsync( int id, UrunGuncelleDto dto, CancellationToken cancellationToken = default)
     {
-        var urun = await _dbContext.Urunler
-            .Include(x => x.UrunDetaylari)
-            .FirstOrDefaultAsync(
-                x => x.Id == id,
-                cancellationToken);
+        var urun =
+            await _dbContext.Urunler
+                .Include(x =>
+                    x.UrunDetaylari)
+                .FirstOrDefaultAsync(
+                    x => x.Id == id,
+                    cancellationToken);
 
         if (urun is null)
         {
@@ -392,7 +524,8 @@ public class UrunServisi : IUrunServisi
             urun.GorselYolu;
 
         var yeniGorselYolu =
-            Temizle(dto.GorselYolu);
+            Temizle(
+                dto.GorselYolu);
 
         await KategoriyiDogrulaAsync(
             dto.KategoriId,
@@ -403,12 +536,15 @@ public class UrunServisi : IUrunServisi
             dto.UrunAdi.Trim();
 
         var urunKodu =
-            dto.UrunKodu.Trim();
+            Temizle(
+                dto.UrunKodu);
 
-        var seoUrl = SeoUrlOlustur(
-            string.IsNullOrWhiteSpace(dto.SeoUrl)
-                ? urunAdi
-                : dto.SeoUrl);
+        var seoUrl =
+            SeoUrlOlustur(
+                string.IsNullOrWhiteSpace(
+                    dto.SeoUrl)
+                    ? urunAdi
+                    : dto.SeoUrl);
 
         if (await UrunKoduKullaniliyorMuAsync(
                 urunKodu,
@@ -443,10 +579,12 @@ public class UrunServisi : IUrunServisi
             urunKodu;
 
         urun.KisaAciklama =
-            Temizle(dto.KisaAciklama);
+            Temizle(
+                dto.KisaAciklama);
 
         urun.DetayliAciklama =
-            _htmlTemizlemeServisi.Temizle(dto.DetayliAciklama);
+            _htmlTemizlemeServisi.Temizle(
+                dto.DetayliAciklama);
 
         urun.GorselYolu =
             yeniGorselYolu;
@@ -503,7 +641,6 @@ public class UrunServisi : IUrunServisi
                    "Güncellenen ürün getirilemedi.");
     }
 
-
     public async Task<UrunTopluSilSonucDto> TopluSilAsync( UrunTopluSilDto dto, CancellationToken cancellationToken = default)
     {
         if (dto.IdListesi is null ||
@@ -513,42 +650,42 @@ public class UrunServisi : IUrunServisi
                 "Silinecek en az bir ürün seçilmelidir.");
         }
 
-        if (dto.IdListesi.Any(x => x <= 0))
+        if (dto.IdListesi.Any(x =>
+                x <= 0))
         {
             throw new IsKuraliException(
                 "Ürün ID değerleri pozitif tam sayı olmalıdır.");
         }
 
-        var istenenIdler = dto.IdListesi
-            .Distinct()
-            .ToList();
+        var istenenIdler =
+            dto.IdListesi
+                .Distinct()
+                .ToList();
 
-        var sonuc = new UrunTopluSilSonucDto
+        var sonuc =
+            new UrunTopluSilSonucDto
+            {
+                IstenenKayitSayisi =
+                    istenenIdler.Count
+            };
+
+        var urunler =
+            await _dbContext.Urunler
+                .Where(x =>
+                    istenenIdler.Contains(
+                        x.Id))
+                .ToListAsync(
+                    cancellationToken);
+
+        var urunSozlugu =
+            urunler.ToDictionary(
+                x => x.Id);
+
+        foreach (var id in
+                 istenenIdler)
         {
-            IstenenKayitSayisi =
-                istenenIdler.Count
-        };
-
-        /*
-         * Silinecek ürünleri tek sorguda alıyoruz.
-         *
-         * Entity'lerin tracked olması gerekiyor çünkü
-         * RemoveRange ile sileceğiz.
-         */
-        var urunler = await _dbContext.Urunler
-            .Where(x => istenenIdler.Contains(x.Id))
-            .ToListAsync(cancellationToken);
-
-        var urunSozlugu = urunler
-            .ToDictionary(x => x.Id);
-
-        /*
-         * İstenen fakat veritabanında bulunmayan
-         * kayıtları sonuçta ayrıca bildiriyoruz.
-         */
-        foreach (var id in istenenIdler)
-        {
-            if (urunSozlugu.ContainsKey(id))
+            if (urunSozlugu.ContainsKey(
+                    id))
             {
                 continue;
             }
@@ -556,53 +693,49 @@ public class UrunServisi : IUrunServisi
             sonuc.Hatalar.Add(
                 new UrunTopluSilHataDto
                 {
-                    Id = id,
-                    UrunAdi = null,
-                    UrunKodu = null,
-                    Mesaj = "Silinecek ürün bulunamadı."
+                    Id =
+                        id,
+
+                    UrunAdi =
+                        null,
+
+                    UrunKodu =
+                        null,
+
+                    Mesaj =
+                        "Silinecek ürün bulunamadı."
                 });
         }
 
-        /*
-         * Fiziksel görsel temizliği için yolları,
-         * ürünleri silmeden önce saklıyoruz.
-         */
-        var silinenUrunGorselYollari = urunler
-            .Select(x => x.GorselYolu)
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Select(x => x!)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
+        var silinenUrunGorselYollari =
+            urunler
+                .Select(x =>
+                    x.GorselYolu)
+                .Where(x =>
+                    !string.IsNullOrWhiteSpace(x))
+                .Select(x =>
+                    x!)
+                .Distinct(
+                    StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
-        var silinenIdler = urunler
-            .Select(x => x.Id)
-            .ToList();
+        var silinenIdler =
+            urunler
+                .Select(x =>
+                    x.Id)
+                .ToList();
 
         if (urunler.Count > 0)
         {
             _dbContext.Urunler.RemoveRange(
                 urunler);
 
-            /*
-             * Ürün teknik detayları mevcut cascade
-             * ilişkisi üzerinden ürünle beraber silinir.
-             *
-             * SaveChanges tek transaction içerisinde
-             * bütün ürün silme işlemini uygular.
-             */
             await _dbContext.SaveChangesAsync(
                 cancellationToken);
         }
 
-        /*
-         * Veritabanı işlemi başarıyla tamamlandıktan
-         * sonra artık hiçbir üründe kullanılmayan
-         * fiziksel görselleri temizliyoruz.
-         *
-         * Helper başka üründe aynı görsel kullanılıyorsa
-         * dosyayı zaten silmez.
-         */
-        foreach (var gorselYolu in silinenUrunGorselYollari)
+        foreach (var gorselYolu in
+                 silinenUrunGorselYollari)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -622,12 +755,14 @@ public class UrunServisi : IUrunServisi
 
         return sonuc;
     }
-    public async Task SilAsync(int id, CancellationToken cancellationToken = default)
+
+    public async Task SilAsync( int id, CancellationToken cancellationToken = default)
     {
-        var urun = await _dbContext.Urunler
-            .FirstOrDefaultAsync(
-                x => x.Id == id,
-                cancellationToken);
+        var urun =
+            await _dbContext.Urunler
+                .FirstOrDefaultAsync(
+                    x => x.Id == id,
+                    cancellationToken);
 
         if (urun is null)
         {
@@ -638,7 +773,8 @@ public class UrunServisi : IUrunServisi
         var eskiGorselYolu =
             urun.GorselYolu;
 
-        _dbContext.Urunler.Remove(urun);
+        _dbContext.Urunler.Remove(
+            urun);
 
         await _dbContext.SaveChangesAsync(
             cancellationToken);
@@ -647,12 +783,13 @@ public class UrunServisi : IUrunServisi
             eskiGorselYolu);
     }
 
-    public async Task<UrunListeDto> DurumDegistirAsync(int id, bool aktifMi, CancellationToken cancellationToken = default)
+    public async Task<UrunListeDto> DurumDegistirAsync( int id, bool aktifMi, CancellationToken cancellationToken = default)
     {
-        var urun = await _dbContext.Urunler
-            .FirstOrDefaultAsync(
-                x => x.Id == id,
-                cancellationToken);
+        var urun =
+            await _dbContext.Urunler
+                .FirstOrDefaultAsync(
+                    x => x.Id == id,
+                    cancellationToken);
 
         if (urun is null)
         {
@@ -684,16 +821,44 @@ public class UrunServisi : IUrunServisi
                    "Ürün getirilemedi.");
     }
 
-    public async Task<IReadOnlyList<UrunFiltreGrubuDto>> FiltreSecenekleriniGetirAsync(
-        int? kategoriId = null,
-        bool altKategorilerDahilMi = true,
-        CancellationToken cancellationToken = default)
+    public async Task<UrunListeDto> OneCikanDurumDegistirAsync( int id, bool oneCikanMi, CancellationToken cancellationToken = default)
+    {
+        var urun =
+            await _dbContext.Urunler
+                .FirstOrDefaultAsync(
+                    x => x.Id == id,
+                    cancellationToken);
+
+        if (urun is null)
+        {
+            throw new KaynakBulunamadiException(
+                "Ürün bulunamadı.");
+        }
+
+        urun.OneCikanMi =
+            oneCikanMi;
+
+        urun.GuncellemeTarihi =
+            DateTime.UtcNow;
+
+        await _dbContext.SaveChangesAsync(
+            cancellationToken);
+
+        return await ListeDtoGetirAsync(
+                   urun.Id,
+                   cancellationToken)
+               ?? throw new InvalidOperationException(
+                   "Ürün getirilemedi.");
+    }
+
+    public async Task<IReadOnlyList<UrunFiltreGrubuDto>> FiltreSecenekleriniGetirAsync( int? kategoriId = null, bool altKategorilerDahilMi = true, CancellationToken cancellationToken = default)
     {
         var etkinAktifKategoriIdleri =
             await EtkinAktifKategoriIdleriniGetirAsync(
                 cancellationToken);
 
-        List<int>? kategoriIdleri = null;
+        List<int>? kategoriIdleri =
+            null;
 
         if (kategoriId.HasValue)
         {
@@ -711,7 +876,9 @@ public class UrunServisi : IUrunServisi
                     await _dbContext.Kategoriler
                         .AsNoTracking()
                         .AnyAsync(
-                            x => x.Id == kategoriId.Value,
+                            x =>
+                                x.Id ==
+                                kategoriId.Value,
                             cancellationToken);
 
                 if (!kategoriVarMi)
@@ -728,89 +895,228 @@ public class UrunServisi : IUrunServisi
             }
         }
 
-        var sorgu = _dbContext.UrunDetaylari
-            .AsNoTracking()
-            .Where(x =>
-                x.AktifMi &&
-                x.Urun.AktifMi &&
-                etkinAktifKategoriIdleri.Contains(
-                    x.Urun.KategoriId) &&
-                x.UrunDetayTanimi.AktifMi &&
-                x.UrunDetayTanimi.FiltredeGosterilsinMi);
+        var sorgu =
+            _dbContext.UrunDetaylari
+                .AsNoTracking()
+                .Where(x =>
+                    x.AktifMi &&
+                    x.Urun.AktifMi &&
+                    etkinAktifKategoriIdleri.Contains(
+                        x.Urun.KategoriId) &&
+                    x.UrunDetayTanimi.AktifMi &&
+                    x.UrunDetayTanimi.FiltredeGosterilsinMi);
 
         if (kategoriIdleri is not null)
         {
-            sorgu = sorgu.Where(
-                x => kategoriIdleri.Contains(
+            sorgu = sorgu.Where(x =>
+                kategoriIdleri.Contains(
                     x.Urun.KategoriId));
         }
 
-        var detaylar = await sorgu
-            .Select(x => new
-            {
-                x.UrunId,
-                x.UrunDetayTanimiId,
-                x.UrunDetayTanimi.DetayAdi,
-                x.UrunDetayTanimi.CokluDegerMi,
-                DetayTanimiSiraNo =
-                    x.UrunDetayTanimi.SiraNo,
-                x.DetayDegeri,
-                DetayDegeriSiraNo =
-                    x.SiraNo
-            })
-            .ToListAsync(cancellationToken);
+        var detaylar =
+            await sorgu
+                .Select(x => new
+                {
+                    x.UrunId,
+                    x.UrunDetayTanimiId,
+                    x.UrunDetayTanimi.DetayAdi,
+                    x.UrunDetayTanimi.CokluDegerMi,
 
-        var filtreGruplari = detaylar
-            .GroupBy(x => new
-            {
-                x.UrunDetayTanimiId,
-                x.DetayAdi,
-                x.CokluDegerMi,
-                x.DetayTanimiSiraNo
-            })
-            .OrderBy(
-                x => x.Key.DetayTanimiSiraNo)
-            .ThenBy(
-                x => x.Key.DetayAdi)
-            .Select(grup => new UrunFiltreGrubuDto
-            {
-                UrunDetayTanimiId =
-                    grup.Key.UrunDetayTanimiId,
+                    DetayTanimiSiraNo =
+                        x.UrunDetayTanimi.SiraNo,
 
-                DetayAdi =
-                    grup.Key.DetayAdi,
+                    x.DetayDegeri,
 
-                CokluDegerMi =
-                    grup.Key.CokluDegerMi,
+                    DetayDegeriSiraNo =
+                        x.SiraNo
+                })
+                .ToListAsync(
+                    cancellationToken);
 
-                SiraNo =
-                    grup.Key.DetayTanimiSiraNo,
-
-                Secenekler = grup
-                    .GroupBy(
-                        x => x.DetayDegeri.Trim(),
-                        StringComparer.OrdinalIgnoreCase)
-                    .OrderBy(
-                        x => x.Min(
-                            y => y.DetayDegeriSiraNo))
-                    .ThenBy(
-                        x => x.Key)
-                    .Select(x => new UrunFiltreSecenegiDto
+        var filtreGruplari =
+            detaylar
+                .GroupBy(x => new
+                {
+                    x.UrunDetayTanimiId,
+                    x.DetayAdi,
+                    x.CokluDegerMi,
+                    x.DetayTanimiSiraNo
+                })
+                .OrderBy(x =>
+                    x.Key.DetayTanimiSiraNo)
+                .ThenBy(x =>
+                    x.Key.DetayAdi)
+                .Select(grup =>
+                    new UrunFiltreGrubuDto
                     {
-                        Deger =
-                            x.Key,
+                        UrunDetayTanimiId =
+                            grup.Key.UrunDetayTanimiId,
 
-                        UrunSayisi =
-                            x.Select(y => y.UrunId)
-                                .Distinct()
-                                .Count()
+                        DetayAdi =
+                            grup.Key.DetayAdi,
+
+                        CokluDegerMi =
+                            grup.Key.CokluDegerMi,
+
+                        SiraNo =
+                            grup.Key.DetayTanimiSiraNo,
+
+                        Secenekler =
+                            grup
+                                .GroupBy(
+                                    x =>
+                                        x.DetayDegeri.Trim(),
+                                    StringComparer.OrdinalIgnoreCase)
+                                .OrderBy(x =>
+                                    x.Min(y =>
+                                        y.DetayDegeriSiraNo))
+                                .ThenBy(x =>
+                                    x.Key)
+                                .Select(x =>
+                                    new UrunFiltreSecenegiDto
+                                    {
+                                        Deger =
+                                            x.Key,
+
+                                        UrunSayisi =
+                                            x.Select(y =>
+                                                    y.UrunId)
+                                                .Distinct()
+                                                .Count()
+                                    })
+                                .ToList()
                     })
-                    .ToList()
-            })
-            .Where(x => x.Secenekler.Count > 0)
-            .ToList();
+                .Where(x =>
+                    x.Secenekler.Count > 0)
+                .ToList();
 
         return filtreGruplari;
+    }
+
+    private async Task UrunListeTeknikDetaylariniDoldurAsync(
+        List<UrunListeDto> urunler,
+        CancellationToken cancellationToken)
+    {
+        if (urunler.Count == 0)
+            return;
+
+        var urunIdleri =
+            urunler
+                .Select(x =>
+                    x.Id)
+                .ToList();
+
+        var detaylar =
+            await _dbContext.UrunDetaylari
+                .AsNoTracking()
+                .Where(x =>
+                    urunIdleri.Contains(
+                        x.UrunId) &&
+                    x.AktifMi &&
+                    x.UrunDetayTanimi.AktifMi)
+                .Select(x => new
+                {
+                    x.UrunId,
+
+                    UrunDetayiId =
+                        x.Id,
+
+                    x.UrunDetayTanimiId,
+                    x.UrunDetayTanimi.DetayAdi,
+                    x.UrunDetayTanimi.CokluDegerMi,
+                    x.UrunDetayTanimi.FiltredeGosterilsinMi,
+                    x.UrunDetayTanimi.SepetteSecilebilirMi,
+
+                    DetayTanimiSiraNo =
+                        x.UrunDetayTanimi.SiraNo,
+
+                    x.DetayDegeri,
+
+                    DetayDegeriSiraNo =
+                        x.SiraNo
+                })
+                .ToListAsync(
+                    cancellationToken);
+
+        var urunDetaylari =
+            detaylar
+                .GroupBy(x =>
+                    x.UrunId)
+                .ToDictionary(
+                    urunGrubu =>
+                        urunGrubu.Key,
+
+                    urunGrubu =>
+                        urunGrubu
+                            .GroupBy(x => new
+                            {
+                                x.UrunDetayTanimiId,
+                                x.DetayAdi,
+                                x.CokluDegerMi,
+                                x.FiltredeGosterilsinMi,
+                                x.SepetteSecilebilirMi,
+                                x.DetayTanimiSiraNo
+                            })
+                            .OrderBy(x =>
+                                x.Key.DetayTanimiSiraNo)
+                            .ThenBy(x =>
+                                x.Key.DetayAdi)
+                            .Select(grup =>
+                                new UrunTeknikDetayGrubuDto
+                                {
+                                    UrunDetayTanimiId =
+                                        grup.Key.UrunDetayTanimiId,
+
+                                    DetayAdi =
+                                        grup.Key.DetayAdi,
+
+                                    CokluDegerMi =
+                                        grup.Key.CokluDegerMi,
+
+                                    FiltredeGosterilsinMi =
+                                        grup.Key.FiltredeGosterilsinMi,
+
+                                    SepetteSecilebilirMi =
+                                        grup.Key.SepetteSecilebilirMi,
+
+                                    SiraNo =
+                                        grup.Key.DetayTanimiSiraNo,
+
+                                    Degerler =
+                                        grup
+                                            .OrderBy(x =>
+                                                x.DetayDegeriSiraNo)
+                                            .ThenBy(x =>
+                                                x.DetayDegeri)
+                                            .Select(x =>
+                                                new UrunTeknikDetayDegeriDto
+                                                {
+                                                    UrunDetayiId =
+                                                        x.UrunDetayiId,
+
+                                                    DetayDegeri =
+                                                        x.DetayDegeri,
+
+                                                    SiraNo =
+                                                        x.DetayDegeriSiraNo,
+
+                                                    AktifMi =
+                                                        true
+                                                })
+                                            .ToList()
+                                })
+                            .ToList());
+
+        foreach (var urun in
+                 urunler)
+        {
+            urun.TeknikDetaylar =
+                urunDetaylari.TryGetValue(
+                    urun.Id,
+                    out var teknikDetaylar)
+                    ? teknikDetaylar
+                    : [];
+        }
     }
 
     private async Task<UrunDetayGoruntuleDto?> UrunDetayiniGetirAsync(
@@ -818,27 +1124,61 @@ public class UrunServisi : IUrunServisi
         bool sadeceAktifDetaylar,
         CancellationToken cancellationToken)
     {
-        var urun = await sorgu
-            .Select(x => new UrunDetayGoruntuleDto
-            {
-                Id = x.Id,
-                KategoriId = x.KategoriId,
-                KategoriAdi = x.Kategori.KategoriAdi,
-                KategoriSeoUrl = x.Kategori.SeoUrl,
-                UrunAdi = x.UrunAdi,
-                UrunKodu = x.UrunKodu,
-                KisaAciklama = x.KisaAciklama,
-                DetayliAciklama = x.DetayliAciklama,
-                GorselYolu = x.GorselYolu,
-                SatisBirimi = x.SatisBirimi,
-                SeoUrl = x.SeoUrl,
-                SeoBasligi = x.SeoBasligi,
-                SeoAciklamasi = x.SeoAciklamasi,
-                OneCikanMi = x.OneCikanMi,
-                SiraNo = x.SiraNo,
-                AktifMi = x.AktifMi
-            })
-            .FirstOrDefaultAsync(cancellationToken);
+        var urun =
+            await sorgu
+                .Select(x =>
+                    new UrunDetayGoruntuleDto
+                    {
+                        Id =
+                            x.Id,
+
+                        KategoriId =
+                            x.KategoriId,
+
+                        KategoriAdi =
+                            x.Kategori.KategoriAdi,
+
+                        KategoriSeoUrl =
+                            x.Kategori.SeoUrl,
+
+                        UrunAdi =
+                            x.UrunAdi,
+
+                        UrunKodu =
+                            x.UrunKodu,
+
+                        KisaAciklama =
+                            x.KisaAciklama,
+
+                        DetayliAciklama =
+                            x.DetayliAciklama,
+
+                        GorselYolu =
+                            x.GorselYolu,
+
+                        SatisBirimi =
+                            x.SatisBirimi,
+
+                        SeoUrl =
+                            x.SeoUrl,
+
+                        SeoBasligi =
+                            x.SeoBasligi,
+
+                        SeoAciklamasi =
+                            x.SeoAciklamasi,
+
+                        OneCikanMi =
+                            x.OneCikanMi,
+
+                        SiraNo =
+                            x.SiraNo,
+
+                        AktifMi =
+                            x.AktifMi
+                    })
+                .FirstOrDefaultAsync(
+                    cancellationToken);
 
         if (urun is null)
             return null;
@@ -846,94 +1186,106 @@ public class UrunServisi : IUrunServisi
         urun.SatisBirimiAdi =
             urun.SatisBirimi.ToString();
 
-        var detaySorgusu = _dbContext.UrunDetaylari
-            .AsNoTracking()
-            .Where(x => x.UrunId == urun.Id);
+        var detaySorgusu =
+            _dbContext.UrunDetaylari
+                .AsNoTracking()
+                .Where(x =>
+                    x.UrunId ==
+                    urun.Id);
 
         if (sadeceAktifDetaylar)
         {
-            detaySorgusu = detaySorgusu.Where(x =>
-                x.AktifMi &&
-                x.UrunDetayTanimi.AktifMi);
+            detaySorgusu =
+                detaySorgusu.Where(x =>
+                    x.AktifMi &&
+                    x.UrunDetayTanimi.AktifMi);
         }
 
-        var detaylar = await detaySorgusu
-            .OrderBy(
-                x => x.UrunDetayTanimi.SiraNo)
-            .ThenBy(
-                x => x.SiraNo)
-            .ThenBy(
-                x => x.DetayDegeri)
-            .Select(x => new
-            {
-                x.Id,
-                x.UrunDetayTanimiId,
-                x.UrunDetayTanimi.DetayAdi,
-                x.UrunDetayTanimi.CokluDegerMi,
-                x.UrunDetayTanimi.FiltredeGosterilsinMi,
-                x.UrunDetayTanimi.SepetteSecilebilirMi,
+        var detaylar =
+            await detaySorgusu
+                .OrderBy(x =>
+                    x.UrunDetayTanimi.SiraNo)
+                .ThenBy(x =>
+                    x.SiraNo)
+                .ThenBy(x =>
+                    x.DetayDegeri)
+                .Select(x => new
+                {
+                    x.Id,
+                    x.UrunDetayTanimiId,
+                    x.UrunDetayTanimi.DetayAdi,
+                    x.UrunDetayTanimi.CokluDegerMi,
+                    x.UrunDetayTanimi.FiltredeGosterilsinMi,
+                    x.UrunDetayTanimi.SepetteSecilebilirMi,
 
-                DetayTanimiSiraNo =
-                    x.UrunDetayTanimi.SiraNo,
+                    DetayTanimiSiraNo =
+                        x.UrunDetayTanimi.SiraNo,
 
-                x.DetayDegeri,
-                x.SiraNo,
-                x.AktifMi
-            })
-            .ToListAsync(cancellationToken);
+                    x.DetayDegeri,
+                    x.SiraNo,
+                    x.AktifMi
+                })
+                .ToListAsync(
+                    cancellationToken);
 
-        urun.TeknikDetaylar = detaylar
-            .GroupBy(x => new
-            {
-                x.UrunDetayTanimiId,
-                x.DetayAdi,
-                x.CokluDegerMi,
-                x.FiltredeGosterilsinMi,
-                x.SepetteSecilebilirMi,
-                x.DetayTanimiSiraNo
-            })
-            .OrderBy(
-                x => x.Key.DetayTanimiSiraNo)
-            .Select(x => new UrunTeknikDetayGrubuDto
-            {
-                UrunDetayTanimiId =
-                    x.Key.UrunDetayTanimiId,
-
-                DetayAdi =
-                    x.Key.DetayAdi,
-
-                CokluDegerMi =
-                    x.Key.CokluDegerMi,
-
-                FiltredeGosterilsinMi =
-                    x.Key.FiltredeGosterilsinMi,
-
-                SepetteSecilebilirMi =
-                    x.Key.SepetteSecilebilirMi,
-
-                SiraNo =
-                    x.Key.DetayTanimiSiraNo,
-
-                Degerler = x
-                    .OrderBy(y => y.SiraNo)
-                    .ThenBy(y => y.DetayDegeri)
-                    .Select(y => new UrunTeknikDetayDegeriDto
+        urun.TeknikDetaylar =
+            detaylar
+                .GroupBy(x => new
+                {
+                    x.UrunDetayTanimiId,
+                    x.DetayAdi,
+                    x.CokluDegerMi,
+                    x.FiltredeGosterilsinMi,
+                    x.SepetteSecilebilirMi,
+                    x.DetayTanimiSiraNo
+                })
+                .OrderBy(x =>
+                    x.Key.DetayTanimiSiraNo)
+                .Select(x =>
+                    new UrunTeknikDetayGrubuDto
                     {
-                        UrunDetayiId =
-                            y.Id,
+                        UrunDetayTanimiId =
+                            x.Key.UrunDetayTanimiId,
 
-                        DetayDegeri =
-                            y.DetayDegeri,
+                        DetayAdi =
+                            x.Key.DetayAdi,
+
+                        CokluDegerMi =
+                            x.Key.CokluDegerMi,
+
+                        FiltredeGosterilsinMi =
+                            x.Key.FiltredeGosterilsinMi,
+
+                        SepetteSecilebilirMi =
+                            x.Key.SepetteSecilebilirMi,
 
                         SiraNo =
-                            y.SiraNo,
+                            x.Key.DetayTanimiSiraNo,
 
-                        AktifMi =
-                            y.AktifMi
+                        Degerler =
+                            x
+                                .OrderBy(y =>
+                                    y.SiraNo)
+                                .ThenBy(y =>
+                                    y.DetayDegeri)
+                                .Select(y =>
+                                    new UrunTeknikDetayDegeriDto
+                                    {
+                                        UrunDetayiId =
+                                            y.Id,
+
+                                        DetayDegeri =
+                                            y.DetayDegeri,
+
+                                        SiraNo =
+                                            y.SiraNo,
+
+                                        AktifMi =
+                                            y.AktifMi
+                                    })
+                                .ToList()
                     })
-                    .ToList()
-            })
-            .ToList();
+                .ToList();
 
         return urun;
     }
@@ -945,8 +1297,8 @@ public class UrunServisi : IUrunServisi
         if (teknikDetaylar.Count == 0)
             return;
 
-        if (teknikDetaylar.Any(
-                x => x.UrunDetayiId.HasValue))
+        if (teknikDetaylar.Any(x =>
+                x.UrunDetayiId.HasValue))
         {
             throw new IsKuraliException(
                 "Yeni ürün oluşturulurken ürün detayı ID değeri gönderilemez.");
@@ -963,12 +1315,13 @@ public class UrunServisi : IUrunServisi
         IReadOnlyCollection<UrunTeknikDetayKaydetDto> teknikDetaylar,
         CancellationToken cancellationToken)
     {
-        var gonderilenDetayIdleri = teknikDetaylar
-            .Where(
-                x => x.UrunDetayiId.HasValue)
-            .Select(
-                x => x.UrunDetayiId!.Value)
-            .ToList();
+        var gonderilenDetayIdleri =
+            teknikDetaylar
+                .Where(x =>
+                    x.UrunDetayiId.HasValue)
+                .Select(x =>
+                    x.UrunDetayiId!.Value)
+                .ToList();
 
         if (gonderilenDetayIdleri.Count !=
             gonderilenDetayIdleri.Distinct().Count())
@@ -977,13 +1330,15 @@ public class UrunServisi : IUrunServisi
                 "Aynı ürün detayı birden fazla kez gönderilemez.");
         }
 
-        var mevcutDetayIdleri = urun.UrunDetaylari
-            .Select(x => x.Id)
-            .ToHashSet();
+        var mevcutDetayIdleri =
+            urun.UrunDetaylari
+                .Select(x =>
+                    x.Id)
+                .ToHashSet();
 
         var baskaUruneAitDetayVarMi =
-            gonderilenDetayIdleri.Any(
-                x => !mevcutDetayIdleri.Contains(x));
+            gonderilenDetayIdleri.Any(x =>
+                !mevcutDetayIdleri.Contains(x));
 
         if (baskaUruneAitDetayVarMi)
         {
@@ -1005,18 +1360,21 @@ public class UrunServisi : IUrunServisi
         if (teknikDetaylar.Count == 0)
             return;
 
-        var detayTanimiIdleri = teknikDetaylar
-            .Select(
-                x => x.UrunDetayTanimiId)
-            .Distinct()
-            .ToList();
+        var detayTanimiIdleri =
+            teknikDetaylar
+                .Select(x =>
+                    x.UrunDetayTanimiId)
+                .Distinct()
+                .ToList();
 
         var detayTanimlari =
             await _dbContext.UrunDetayTanimlari
                 .AsNoTracking()
-                .Where(
-                    x => detayTanimiIdleri.Contains(x.Id))
-                .ToListAsync(cancellationToken);
+                .Where(x =>
+                    detayTanimiIdleri.Contains(
+                        x.Id))
+                .ToListAsync(
+                    cancellationToken);
 
         if (detayTanimlari.Count !=
             detayTanimiIdleri.Count)
@@ -1035,13 +1393,15 @@ public class UrunServisi : IUrunServisi
                     x => x.Id)
             ?? new Dictionary<int, UrunDetayi>();
 
-        foreach (var teknikDetay in teknikDetaylar)
+        foreach (var teknikDetay in
+                 teknikDetaylar)
         {
             var detayTanimi =
                 detayTanimiSozlugu[
                     teknikDetay.UrunDetayTanimiId];
 
-            UrunDetayi? mevcutDetay = null;
+            UrunDetayi? mevcutDetay =
+                null;
 
             if (teknikDetay.UrunDetayiId.HasValue)
             {
@@ -1061,15 +1421,15 @@ public class UrunServisi : IUrunServisi
 
             var degisiklikVarMi =
                 mevcutDetay.UrunDetayTanimiId !=
-                    teknikDetay.UrunDetayTanimiId ||
+                teknikDetay.UrunDetayTanimiId ||
                 !string.Equals(
                     mevcutDetay.DetayDegeri.Trim(),
                     teknikDetay.DetayDegeri.Trim(),
                     StringComparison.Ordinal) ||
                 mevcutDetay.SiraNo !=
-                    teknikDetay.SiraNo ||
+                teknikDetay.SiraNo ||
                 mevcutDetay.AktifMi !=
-                    teknikDetay.AktifMi;
+                teknikDetay.AktifMi;
 
             if (degisiklikVarMi)
             {
@@ -1078,9 +1438,10 @@ public class UrunServisi : IUrunServisi
             }
         }
 
-        foreach (var grup in teknikDetaylar
-                     .GroupBy(
-                         x => x.UrunDetayTanimiId))
+        foreach (var grup in
+                 teknikDetaylar.GroupBy(
+                     x =>
+                         x.UrunDetayTanimiId))
         {
             var detayTanimi =
                 detayTanimiSozlugu[
@@ -1093,18 +1454,19 @@ public class UrunServisi : IUrunServisi
                     $"'{detayTanimi.DetayAdi}' ürün özelliği birden fazla değer kabul etmemektedir.");
             }
 
-            var normalizeDegerler = grup
-                .Select(
-                    x => x.DetayDegeri.Trim())
-                .ToList();
+            var normalizeDegerler =
+                grup
+                    .Select(x =>
+                        x.DetayDegeri.Trim())
+                    .ToList();
 
             var ayniDegerVarMi =
                 normalizeDegerler
                     .GroupBy(
                         x => x,
                         StringComparer.OrdinalIgnoreCase)
-                    .Any(
-                        x => x.Count() > 1);
+                    .Any(x =>
+                        x.Count() > 1);
 
             if (ayniDegerVarMi)
             {
@@ -1125,16 +1487,17 @@ public class UrunServisi : IUrunServisi
 
         var korunacakDetayIdleri =
             teknikDetaylar
-                .Where(
-                    x => x.UrunDetayiId.HasValue)
-                .Select(
-                    x => x.UrunDetayiId!.Value)
+                .Where(x =>
+                    x.UrunDetayiId.HasValue)
+                .Select(x =>
+                    x.UrunDetayiId!.Value)
                 .ToHashSet();
 
         var silinecekDetaylar =
             urun.UrunDetaylari
-                .Where(
-                    x => !korunacakDetayIdleri.Contains(x.Id))
+                .Where(x =>
+                    !korunacakDetayIdleri.Contains(
+                        x.Id))
                 .ToList();
 
         if (silinecekDetaylar.Count > 0)
@@ -1143,7 +1506,8 @@ public class UrunServisi : IUrunServisi
                 silinecekDetaylar);
         }
 
-        foreach (var teknikDetay in teknikDetaylar)
+        foreach (var teknikDetay in
+                 teknikDetaylar)
         {
             if (teknikDetay.UrunDetayiId.HasValue)
             {
@@ -1194,8 +1558,8 @@ public class UrunServisi : IUrunServisi
                 cancellationToken);
 
         var secilenKategori =
-            kategoriler.FirstOrDefault(
-                x => x.Id == kategoriId);
+            kategoriler.FirstOrDefault(x =>
+                x.Id == kategoriId);
 
         if (secilenKategori is null)
         {
@@ -1203,7 +1567,8 @@ public class UrunServisi : IUrunServisi
                 "Seçilen kategori bulunamadı.");
         }
 
-        HashSet<int>? etkinAktifKategoriIdleri = null;
+        HashSet<int>? etkinAktifKategoriIdleri =
+            null;
 
         if (sadeceAktifKategoriler)
         {
@@ -1246,11 +1611,14 @@ public class UrunServisi : IUrunServisi
 
             var altKategoriler =
                 kategoriler.Where(x =>
-                    x.UstKategoriId == mevcutKategoriId &&
+                    x.UstKategoriId ==
+                    mevcutKategoriId &&
                     (!sadeceAktifKategoriler ||
-                     etkinAktifKategoriIdleri!.Contains(x.Id)));
+                     etkinAktifKategoriIdleri!.Contains(
+                         x.Id)));
 
-            foreach (var altKategori in altKategoriler)
+            foreach (var altKategori in
+                     altKategoriler)
             {
                 if (!ziyaretEdilenler.Contains(
                         altKategori.Id))
@@ -1314,13 +1682,20 @@ public class UrunServisi : IUrunServisi
     {
         return await _dbContext.Kategoriler
             .AsNoTracking()
-            .Select(x => new KategoriDurumu
-            {
-                Id = x.Id,
-                UstKategoriId = x.UstKategoriId,
-                AktifMi = x.AktifMi
-            })
-            .ToListAsync(cancellationToken);
+            .Select(x =>
+                new KategoriDurumu
+                {
+                    Id =
+                        x.Id,
+
+                    UstKategoriId =
+                        x.UstKategoriId,
+
+                    AktifMi =
+                        x.AktifMi
+                })
+            .ToListAsync(
+                cancellationToken);
     }
 
     private static HashSet<int> EtkinAktifKategoriIdleriniHesapla(
@@ -1333,7 +1708,8 @@ public class UrunServisi : IUrunServisi
         var etkinAktifKategoriIdleri =
             new HashSet<int>();
 
-        foreach (var kategori in kategoriler)
+        foreach (var kategori in
+                 kategoriler)
         {
             if (!kategori.AktifMi)
                 continue;
@@ -1352,13 +1728,17 @@ public class UrunServisi : IUrunServisi
                 if (!ziyaretEdilenler.Add(
                         mevcutKategori.Id))
                 {
-                    etkinAktifMi = false;
+                    etkinAktifMi =
+                        false;
+
                     break;
                 }
 
                 if (!mevcutKategori.AktifMi)
                 {
-                    etkinAktifMi = false;
+                    etkinAktifMi =
+                        false;
+
                     break;
                 }
 
@@ -1369,7 +1749,9 @@ public class UrunServisi : IUrunServisi
                         mevcutKategori.UstKategoriId.Value,
                         out var ustKategori))
                 {
-                    etkinAktifMi = false;
+                    etkinAktifMi =
+                        false;
+
                     break;
                 }
 
@@ -1402,7 +1784,9 @@ public class UrunServisi : IUrunServisi
                 await _dbContext.Urunler
                     .AsNoTracking()
                     .AnyAsync(
-                        x => x.GorselYolu == gorselYolu,
+                        x =>
+                            x.GorselYolu ==
+                            gorselYolu,
                         CancellationToken.None);
 
             if (baskaUrundeKullaniliyorMu)
@@ -1422,20 +1806,31 @@ public class UrunServisi : IUrunServisi
     }
 
     private async Task<bool> UrunKoduKullaniliyorMuAsync(
-        string urunKodu,
+        string? urunKodu,
         int? haricUrunId,
         CancellationToken cancellationToken)
     {
+        if (string.IsNullOrWhiteSpace(
+                urunKodu))
+        {
+            return false;
+        }
+
+        var temizUrunKodu =
+            urunKodu.Trim();
+
         var sorgu =
             _dbContext.Urunler
                 .AsNoTracking()
-                .Where(
-                    x => x.UrunKodu == urunKodu);
+                .Where(x =>
+                    x.UrunKodu ==
+                    temizUrunKodu);
 
         if (haricUrunId.HasValue)
         {
-            sorgu = sorgu.Where(
-                x => x.Id != haricUrunId.Value);
+            sorgu = sorgu.Where(x =>
+                x.Id !=
+                haricUrunId.Value);
         }
 
         return await sorgu.AnyAsync(
@@ -1450,13 +1845,15 @@ public class UrunServisi : IUrunServisi
         var sorgu =
             _dbContext.Urunler
                 .AsNoTracking()
-                .Where(
-                    x => x.SeoUrl == seoUrl);
+                .Where(x =>
+                    x.SeoUrl ==
+                    seoUrl);
 
         if (haricUrunId.HasValue)
         {
-            sorgu = sorgu.Where(
-                x => x.Id != haricUrunId.Value);
+            sorgu = sorgu.Where(x =>
+                x.Id !=
+                haricUrunId.Value);
         }
 
         return await sorgu.AnyAsync(
@@ -1477,10 +1874,10 @@ public class UrunServisi : IUrunServisi
         var sirketAdi =
             await _dbContext.FirmaGenelBilgileri
                 .AsNoTracking()
-                .Where(
-                    x => x.Id == 1)
-                .Select(
-                    x => x.SirketAdi)
+                .Where(x =>
+                    x.Id == 1)
+                .Select(x =>
+                    x.SirketAdi)
                 .FirstOrDefaultAsync(
                     cancellationToken);
 
@@ -1497,29 +1894,65 @@ public class UrunServisi : IUrunServisi
         var urun =
             await _dbContext.Urunler
                 .AsNoTracking()
-                .Where(
-                    x => x.Id == id)
-                .Select(x => new UrunListeDto
-                {
-                    Id = x.Id,
-                    KategoriId = x.KategoriId,
-                    KategoriAdi = x.Kategori.KategoriAdi,
-                    UrunAdi = x.UrunAdi,
-                    UrunKodu = x.UrunKodu,
-                    KisaAciklama = x.KisaAciklama,
-                    DetayliAciklama = x.DetayliAciklama,
-                    GorselYolu = x.GorselYolu,
-                    SatisBirimi = x.SatisBirimi,
-                    SeoUrl = x.SeoUrl,
-                    SeoBasligi = x.SeoBasligi,
-                    SeoAciklamasi = x.SeoAciklamasi,
-                    OneCikanMi = x.OneCikanMi,
-                    SiraNo = x.SiraNo,
-                    AktifMi = x.AktifMi,
-                    TeknikDetaySayisi = x.UrunDetaylari.Count,
-                    OlusturmaTarihi = x.OlusturmaTarihi,
-                    GuncellemeTarihi = x.GuncellemeTarihi
-                })
+                .Where(x =>
+                    x.Id == id)
+                .Select(x =>
+                    new UrunListeDto
+                    {
+                        Id =
+                            x.Id,
+
+                        KategoriId =
+                            x.KategoriId,
+
+                        KategoriAdi =
+                            x.Kategori.KategoriAdi,
+
+                        UrunAdi =
+                            x.UrunAdi,
+
+                        UrunKodu =
+                            x.UrunKodu,
+
+                        KisaAciklama =
+                            x.KisaAciklama,
+
+                        DetayliAciklama =
+                            x.DetayliAciklama,
+
+                        GorselYolu =
+                            x.GorselYolu,
+
+                        SatisBirimi =
+                            x.SatisBirimi,
+
+                        SeoUrl =
+                            x.SeoUrl,
+
+                        SeoBasligi =
+                            x.SeoBasligi,
+
+                        SeoAciklamasi =
+                            x.SeoAciklamasi,
+
+                        OneCikanMi =
+                            x.OneCikanMi,
+
+                        SiraNo =
+                            x.SiraNo,
+
+                        AktifMi =
+                            x.AktifMi,
+
+                        TeknikDetaySayisi =
+                            x.UrunDetaylari.Count,
+
+                        OlusturmaTarihi =
+                            x.OlusturmaTarihi,
+
+                        GuncellemeTarihi =
+                            x.GuncellemeTarihi
+                    })
                 .FirstOrDefaultAsync(
                     cancellationToken);
 
@@ -1540,29 +1973,38 @@ public class UrunServisi : IUrunServisi
         {
             UrunSiralamaTuru.SiraNoAzalan =>
                 sorgu
-                    .OrderByDescending(x => x.SiraNo)
-                    .ThenBy(x => x.UrunAdi),
+                    .OrderByDescending(x =>
+                        x.SiraNo)
+                    .ThenBy(x =>
+                        x.UrunAdi),
 
             UrunSiralamaTuru.UrunAdiArtan =>
-                sorgu.OrderBy(x => x.UrunAdi),
+                sorgu.OrderBy(x =>
+                    x.UrunAdi),
 
             UrunSiralamaTuru.UrunAdiAzalan =>
-                sorgu.OrderByDescending(x => x.UrunAdi),
+                sorgu.OrderByDescending(x =>
+                    x.UrunAdi),
 
             UrunSiralamaTuru.YeniEklenenler =>
-                sorgu.OrderByDescending(x => x.OlusturmaTarihi),
+                sorgu.OrderByDescending(x =>
+                    x.OlusturmaTarihi),
 
             UrunSiralamaTuru.EskiEklenenler =>
-                sorgu.OrderBy(x => x.OlusturmaTarihi),
+                sorgu.OrderBy(x =>
+                    x.OlusturmaTarihi),
 
             _ =>
                 sorgu
-                    .OrderBy(x => x.SiraNo)
-                    .ThenBy(x => x.UrunAdi)
+                    .OrderBy(x =>
+                        x.SiraNo)
+                    .ThenBy(x =>
+                        x.UrunAdi)
         };
     }
 
-    private static string SeoUrlOlustur(string metin)
+    private static string SeoUrlOlustur(
+        string metin)
     {
         var duzenlenmisMetin =
             metin
@@ -1586,7 +2028,8 @@ public class UrunServisi : IUrunServisi
         var sonuc =
             new StringBuilder();
 
-        foreach (var karakter in duzenlenmisMetin)
+        foreach (var karakter in
+                 duzenlenmisMetin)
         {
             if (CharUnicodeInfo.GetUnicodeCategory(
                     karakter) !=
@@ -1636,7 +2079,7 @@ public class UrunServisi : IUrunServisi
         string? deger)
     {
         return string.IsNullOrWhiteSpace(
-            deger)
+                deger)
             ? null
             : deger.Trim();
     }
@@ -1644,7 +2087,8 @@ public class UrunServisi : IUrunServisi
     private static void SatisBirimiAdlariniDoldur(
         IEnumerable<UrunListeDto> urunler)
     {
-        foreach (var urun in urunler)
+        foreach (var urun in
+                 urunler)
         {
             urun.SatisBirimiAdi =
                 urun.SatisBirimi.ToString();

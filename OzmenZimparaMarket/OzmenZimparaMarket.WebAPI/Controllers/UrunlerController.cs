@@ -51,10 +51,7 @@ public class UrunlerController : ControllerBase
 
     [AllowAnonymous]
     [HttpGet("filtre-secenekleri")]
-    public async Task<IActionResult> FiltreSecenekleri(
-        [FromQuery] int? kategoriId = null,
-        [FromQuery] bool altKategorilerDahilMi = true,
-        CancellationToken cancellationToken = default)
+    public async Task<IActionResult> FiltreSecenekleri( [FromQuery] int? kategoriId = null, [FromQuery] bool altKategorilerDahilMi = true, CancellationToken cancellationToken = default)
     {
         var filtreSecenekleri = await _urunServisi.FiltreSecenekleriniGetirAsync(
             kategoriId,
@@ -111,6 +108,28 @@ public class UrunlerController : ControllerBase
             throw new IsKuraliException("Aktiflik durumu belirtilmelidir.");
 
         var urun = await _urunServisi.DurumDegistirAsync(id, aktifMi.Value, cancellationToken);
+
+        return Ok(urun);
+    }
+
+    [Authorize]
+    [HttpPatch("one-cikan-degistir/{id:int}")]
+    public async Task<IActionResult> OneCikanDurumDegistir(
+    int id,
+    [FromQuery] bool? oneCikanMi,
+    CancellationToken cancellationToken)
+    {
+        if (!oneCikanMi.HasValue)
+        {
+            throw new IsKuraliException(
+                "Öne çıkan durumu belirtilmelidir.");
+        }
+
+        var urun =
+            await _urunServisi.OneCikanDurumDegistirAsync(
+                id,
+                oneCikanMi.Value,
+                cancellationToken);
 
         return Ok(urun);
     }

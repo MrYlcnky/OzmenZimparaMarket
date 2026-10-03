@@ -14,7 +14,7 @@ public class UrunDetayGoruntuleDto
 
     public string UrunAdi { get; set; } = string.Empty;
 
-    public string UrunKodu { get; set; } = string.Empty;
+    public string? UrunKodu { get; set; }
 
     public string? KisaAciklama { get; set; }
 

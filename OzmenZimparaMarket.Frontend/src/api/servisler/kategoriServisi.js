@@ -1,5 +1,25 @@
 import apiClient from "../client";
 
+export async function kategoriAgaciniGetir() {
+  const response = await apiClient.get("/kategoriler/agac");
+
+  return response.data;
+}
+
+export async function kategoriSeoUrlIleGetir(seoUrl) {
+  const response = await apiClient.get(
+    `/kategoriler/seo-url/${encodeURIComponent(seoUrl)}`,
+  );
+
+  return response.data;
+}
+
+export async function kategorileriGetir() {
+  const response = await apiClient.get("/kategoriler/listele");
+
+  return response.data;
+}
+
 export async function yonetimKategorileriniGetir() {
   const response = await apiClient.get("/kategoriler/yonetim-listele");
 

@@ -63,7 +63,7 @@ function PublicMobileMenu({
               hover:text-white
             "
           >
-            <span>Hakkımızda</span>
+            <span>Kurumsal</span>
 
             <ChevronIcon open={kurumsalAcikMi} />
           </button>
@@ -81,22 +81,11 @@ function PublicMobileMenu({
                 Hakkımızda
               </MobilAltLink>
 
-              <MobilAltLink to="/hakkimizda#vizyonumuz" onClick={onClose}>
+              <MobilAltLink to="/vizyon-misyon-strateji" onClick={onClose}>
                 Vizyonumuz
               </MobilAltLink>
 
-              <MobilAltLink to="/hakkimizda#misyonumuz" onClick={onClose}>
-                Misyonumuz
-              </MobilAltLink>
-
-              <MobilAltLink to="/hakkimizda#stratejimiz" onClick={onClose}>
-                Stratejimiz
-              </MobilAltLink>
-
-              <MobilAltLink
-                to="/hakkimizda#kalite-politikamiz"
-                onClick={onClose}
-              >
+              <MobilAltLink to="/kalite-politikasi" onClick={onClose}>
                 Kalite Politikamız
               </MobilAltLink>
             </div>
@@ -240,19 +229,21 @@ function MobilAltLink({ to, onClick, children }) {
     <NavLink
       to={to}
       onClick={onClick}
-      className="
+      className={({ isActive }) => `
         block
         rounded-lg
         px-3
         py-2.5
         text-xs
         font-semibold
-        text-white/50
         transition-colors
 
-        hover:bg-white/[0.04]
-        hover:text-purple-300
-      "
+        ${
+          isActive
+            ? "bg-purple-500/10 text-purple-300"
+            : "text-white/50 hover:bg-white/[0.04] hover:text-purple-300"
+        }
+      `}
     >
       {children}
     </NavLink>

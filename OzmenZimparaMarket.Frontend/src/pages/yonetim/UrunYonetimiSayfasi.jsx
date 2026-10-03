@@ -47,6 +47,7 @@ function UrunYonetimiSayfasi() {
     siliniyorMu,
     silinecekUrun,
     durumDegistirilenUrunId,
+    oneCikanDegistirilenUrunId,
 
     seciliUrunIdleri,
     seciliUrunler,
@@ -61,7 +62,7 @@ function UrunYonetimiSayfasi() {
     sayfaBoyutuDegistir,
 
     urunDurumunuDegistir,
-
+    urunOneCikanDurumunuDegistir,
     silmeModaliniAc,
     silmeModaliniKapat,
     urunuSil,
@@ -445,6 +446,8 @@ function UrunYonetimiSayfasi() {
           onUrunDetay={urunDetayModaliniAc}
           onUrunDuzenle={urunDuzenlemeFormunuAc}
           silmeModaliniAc={silmeModaliniAc}
+          oneCikanDegistirilenUrunId={oneCikanDegistirilenUrunId}
+          urunOneCikanDurumunuDegistir={urunOneCikanDurumunuDegistir}
         />
       </div>
 

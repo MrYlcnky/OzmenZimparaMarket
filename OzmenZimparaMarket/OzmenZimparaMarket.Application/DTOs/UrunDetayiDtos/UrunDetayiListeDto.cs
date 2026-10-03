@@ -8,7 +8,7 @@ public class UrunDetayiListeDto
 
     public string UrunAdi { get; set; } = string.Empty;
 
-    public string UrunKodu { get; set; } = string.Empty;
+    public string? UrunKodu { get; set; } 
 
     public int UrunDetayTanimiId { get; set; }
 

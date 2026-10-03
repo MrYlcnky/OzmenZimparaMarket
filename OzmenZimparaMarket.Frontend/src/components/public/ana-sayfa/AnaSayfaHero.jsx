@@ -45,7 +45,7 @@ function AnaSayfaHero() {
           bg-gradient-to-r
           from-[#050711]
           via-[#050711]/95
-          via-[42%]
+          via-[44%]
           to-[#050711]/25
         "
       />
@@ -116,18 +116,19 @@ function AnaSayfaHero() {
           max-w-[1440px]
           items-center
           px-5
-          py-16
+          py-12
 
           sm:px-6
+          sm:py-14
 
           lg:px-8
-          lg:py-20
+          lg:py-16
         "
       >
         <div
           className="
             w-full
-            max-w-[760px]
+            max-w-[860px]
           "
         >
           {/* Eyebrow */}
@@ -141,52 +142,61 @@ function AnaSayfaHero() {
             <span
               className="
                 h-px
-                w-10
+                w-8
+                shrink-0
                 bg-gradient-to-r
                 from-blue-500
                 to-purple-500
+
+                sm:w-10
               "
             />
 
             <span
               className="
-                text-[11px]
+                text-[9px]
                 font-extrabold
                 uppercase
-                tracking-[0.22em]
+                tracking-[0.16em]
                 text-purple-300
 
-                sm:text-xs
+                sm:text-[10px]
+                sm:tracking-[0.18em]
+
+                lg:text-[11px]
               "
             >
-              Profesyonel Aşındırıcı Çözümler
+              PROFESYONEL ZIMPARA & AŞINDIRICI ÇÖZÜMLERİ
             </span>
           </div>
 
           {/* Başlık */}
           <h1
             className="
-              mt-7
-              max-w-[760px]
-              text-[42px]
+              mt-6
+              max-w-[860px]
+              text-[38px]
               font-extrabold
-              leading-[1.02]
-              tracking-[-0.045em]
+              leading-[1.04]
+              tracking-[-0.04em]
               text-white
 
-              sm:text-[54px]
+              sm:text-[48px]
 
-              lg:text-[68px]
+              lg:text-[58px]
+              lg:leading-[1.03]
 
-              xl:text-[76px]
+              xl:text-[64px]
             "
           >
-            Endüstriyel Zımpara
-            <br />
-            Çözümlerinde
-            <br />
+            <span className="block">Endüstriyel Yüzey İşlemede</span>
+
+            <span className="block">Profesyonel Zımpara Çözümleri</span>
+
             <span
               className="
+                mt-1
+                block
                 bg-gradient-to-r
                 from-[#8b5cf6]
                 via-[#9b6cff]
@@ -202,27 +212,29 @@ function AnaSayfaHero() {
           {/* Açıklama */}
           <p
             className="
-              mt-7
-              max-w-[650px]
-              text-[15px]
+              mt-6
+              max-w-[670px]
+              text-[14px]
               leading-7
-              text-white/58
+              text-white/55
 
-              sm:text-base
-              sm:leading-8
+              sm:text-[15px]
+              sm:leading-7
 
-              lg:text-[17px]
+              lg:text-base
+              lg:leading-8
             "
           >
-            Profesyonel kullanım için geniş zımpara ve aşındırıcı ürün
-            yelpazesi, teknik ürün seçenekleri ve ihtiyaçlarınıza uygun
-            endüstriyel yüzey işleme çözümleri.
+            Farklı yüzeyler ve endüstriyel uygulamalar için zımpara bantları,
+            diskler, rulolar ve profesyonel aşındırıcı ürünler. İhtiyacınıza
+            uygun ürünü seçmenize yardımcı oluyor, doğru çözümü güvenilir
+            tedarikle buluşturuyoruz.
           </p>
 
           {/* CTA */}
           <div
             className="
-              mt-9
+              mt-8
               flex
               flex-col
               gap-3
@@ -236,7 +248,7 @@ function AnaSayfaHero() {
               className="
                 group
                 inline-flex
-                h-13
+                h-12
                 items-center
                 justify-center
                 gap-2.5
@@ -245,7 +257,7 @@ function AnaSayfaHero() {
                 from-[#7446ef]
                 to-[#6d4af4]
                 px-6
-                text-sm
+                text-[13px]
                 font-extrabold
                 text-white
                 shadow-[0_16px_45px_rgba(116,70,239,0.28)]
@@ -254,6 +266,8 @@ function AnaSayfaHero() {
 
                 hover:-translate-y-0.5
                 hover:shadow-[0_20px_55px_rgba(116,70,239,0.38)]
+
+                sm:text-sm
               "
             >
               Ürünleri İncele
@@ -267,14 +281,14 @@ function AnaSayfaHero() {
                 rel="noreferrer"
                 className="
                   inline-flex
-                  h-13
+                  h-12
                   items-center
                   justify-center
                   gap-2.5
                   rounded-xl
                   bg-[#25D366]
                   px-6
-                  text-sm
+                  text-[13px]
                   font-extrabold
                   text-white
                   shadow-[0_16px_45px_rgba(37,211,102,0.18)]
@@ -284,6 +298,8 @@ function AnaSayfaHero() {
                   hover:-translate-y-0.5
                   hover:bg-[#20bd5a]
                   hover:shadow-[0_20px_55px_rgba(37,211,102,0.25)]
+
+                  sm:text-sm
                 "
               >
                 <WhatsAppIcon />
@@ -294,7 +310,7 @@ function AnaSayfaHero() {
                 to="/iletisim"
                 className="
                   inline-flex
-                  h-13
+                  h-12
                   items-center
                   justify-center
                   gap-2.5
@@ -303,13 +319,15 @@ function AnaSayfaHero() {
                   border-white/15
                   bg-white/[0.06]
                   px-6
-                  text-sm
+                  text-[13px]
                   font-extrabold
                   text-white
                   backdrop-blur-md
                   transition-all
 
                   hover:bg-white/[0.10]
+
+                  sm:text-sm
                 "
               >
                 Bize Ulaşın
@@ -320,18 +338,18 @@ function AnaSayfaHero() {
           {/* Güven noktaları */}
           <div
             className="
-              mt-10
+              mt-9
               flex
               flex-wrap
-              gap-x-7
-              gap-y-4
+              gap-x-6
+              gap-y-3
             "
           >
-            <GuvenNoktasi>Profesyonel Ürün Yelpazesi</GuvenNoktasi>
+            <GuvenNoktasi>Geniş Ürün Yelpazesi</GuvenNoktasi>
 
-            <GuvenNoktasi>Teknik Ürün Seçimi</GuvenNoktasi>
+            <GuvenNoktasi>Uygulamaya Uygun Ürün Seçimi</GuvenNoktasi>
 
-            <GuvenNoktasi>Hızlı Teklif Desteği</GuvenNoktasi>
+            <GuvenNoktasi>Hızlı Teklif & Tedarik</GuvenNoktasi>
           </div>
         </div>
       </div>
@@ -343,7 +361,7 @@ function AnaSayfaHero() {
           absolute
           inset-x-0
           bottom-0
-          h-28
+          h-24
           bg-gradient-to-t
           from-[#050711]
           to-transparent
@@ -382,9 +400,11 @@ function GuvenNoktasi({ children }) {
 
       <span
         className="
-          text-xs
+          text-[11px]
           font-semibold
-          text-white/52
+          text-white/50
+
+          sm:text-xs
         "
       >
         {children}

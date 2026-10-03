@@ -25,4 +25,6 @@ public interface IUrunServisi
     Task SilAsync(int id, CancellationToken cancellationToken = default);
 
     Task<UrunListeDto> DurumDegistirAsync(int id, bool aktifMi, CancellationToken cancellationToken = default);
+
+    Task<UrunListeDto> OneCikanDurumDegistirAsync( int id, bool oneCikanMi, CancellationToken cancellationToken = default);
 }

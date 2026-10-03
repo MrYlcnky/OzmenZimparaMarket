@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 
 import {
   urunDurumDegistir,
+  urunOneCikanDurumDegistir,
   urunSil,
   urunTopluSil,
   yonetimUrunleriniFiltrele,
@@ -157,6 +158,8 @@ export default function useUrunYonetimi() {
   const [yukleniyorMu, setYukleniyorMu] = useState(true);
 
   const [durumDegistirilenUrunId, setDurumDegistirilenUrunId] = useState(null);
+  const [oneCikanDegistirilenUrunId, setOneCikanDegistirilenUrunId] =
+    useState(null);
 
   const [siliniyorMu, setSiliniyorMu] = useState(false);
 
@@ -435,6 +438,39 @@ export default function useUrunYonetimi() {
     [durumDegistirilenUrunId, urunleriYukle],
   );
 
+  const urunOneCikanDurumunuDegistir = useCallback(
+    async (urun) => {
+      if (!urun?.id || oneCikanDegistirilenUrunId) {
+        return;
+      }
+
+      const yeniDurum = !urun.oneCikanMi;
+
+      setOneCikanDegistirilenUrunId(urun.id);
+
+      try {
+        await urunOneCikanDurumDegistir(urun.id, yeniDurum);
+
+        toast.success(
+          yeniDurum
+            ? "Ürün öne çıkanlara eklendi."
+            : "Ürün öne çıkanlardan kaldırıldı.",
+        );
+
+        await urunleriYukle();
+      } catch (error) {
+        toast.error(
+          apiHataMesajiGetir(
+            error,
+            "Ürünün öne çıkan durumu değiştirilirken bir hata oluştu.",
+          ),
+        );
+      } finally {
+        setOneCikanDegistirilenUrunId(null);
+      }
+    },
+    [oneCikanDegistirilenUrunId, urunleriYukle],
+  );
   const silmeModaliniAc = useCallback((urun) => {
     setSilinecekUrun(urun ?? null);
   }, []);
@@ -692,6 +728,7 @@ export default function useUrunYonetimi() {
     siliniyorMu,
     silinecekUrun,
     durumDegistirilenUrunId,
+    oneCikanDegistirilenUrunId,
 
     seciliUrunIdleri,
     seciliUrunler,
@@ -706,6 +743,7 @@ export default function useUrunYonetimi() {
     sayfaBoyutuDegistir,
 
     urunDurumunuDegistir,
+    urunOneCikanDurumunuDegistir,
 
     silmeModaliniAc,
     silmeModaliniKapat,

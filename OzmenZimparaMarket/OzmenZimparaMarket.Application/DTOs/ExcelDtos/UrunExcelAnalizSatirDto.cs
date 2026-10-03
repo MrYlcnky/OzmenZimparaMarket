@@ -4,7 +4,7 @@ public class UrunExcelAnalizSatirDto
 {
     public int SatirNo { get; set; }
 
-    public string UrunKodu { get; set; } = string.Empty;
+    public string? UrunKodu { get; set; }
 
     public string UrunAdi { get; set; } = string.Empty;
 

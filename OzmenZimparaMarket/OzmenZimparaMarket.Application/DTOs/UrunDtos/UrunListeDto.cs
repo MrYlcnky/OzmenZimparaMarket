@@ -12,7 +12,7 @@ public class UrunListeDto
 
     public string UrunAdi { get; set; } = string.Empty;
 
-    public string UrunKodu { get; set; } = string.Empty;
+    public string? UrunKodu { get; set; }
 
     public string? KisaAciklama { get; set; }
 
@@ -41,4 +41,5 @@ public class UrunListeDto
     public DateTime OlusturmaTarihi { get; set; }
 
     public DateTime? GuncellemeTarihi { get; set; }
+    public List<UrunTeknikDetayGrubuDto> TeknikDetaylar { get; set; } = [];
 }

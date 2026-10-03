@@ -95,11 +95,10 @@ export const urunSchema = z.object({
     .min(1, "Ürün adı zorunludur.")
     .max(200, "Ürün adı en fazla 200 karakter olabilir."),
 
-  urunKodu: z
-    .string()
-    .trim()
-    .min(1, "Ürün kodu zorunludur.")
-    .max(100, "Ürün kodu en fazla 100 karakter olabilir."),
+  urunKodu: nullableMetinSchema(
+    100,
+    "Ürün kodu en fazla 100 karakter olabilir.",
+  ),
 
   kisaAciklama: nullableMetinSchema(
     1000,

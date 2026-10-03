@@ -11,68 +11,91 @@ public class ExcelUrunExportServisi : IExcelUrunExportServisi
 {
     private readonly OzmenZimparaMarketDbContext _dbContext;
 
-    public ExcelUrunExportServisi(OzmenZimparaMarketDbContext dbContext)
+    public ExcelUrunExportServisi(
+        OzmenZimparaMarketDbContext dbContext)
     {
         _dbContext = dbContext;
     }
 
-    public async Task<ExcelDosyaDto> DisariAktarAsync(CancellationToken cancellationToken = default)
+    public async Task<ExcelDosyaDto> DisariAktarAsync(
+        CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var kategoriler = await _dbContext.Kategoriler
-            .AsNoTracking()
-            .ToListAsync(cancellationToken);
-
-        var urunler = await _dbContext.Urunler
-            .AsNoTracking()
-            .OrderBy(x => x.SiraNo)
-            .ThenBy(x => x.UrunAdi)
-            .ToListAsync(cancellationToken);
-
-        var teknikOzellikler = await _dbContext.UrunDetayTanimlari
-            .AsNoTracking()
-            .OrderBy(x => x.SiraNo)
-            .ThenBy(x => x.DetayAdi)
-            .ToListAsync(cancellationToken);
-
-        var urunIdleri = urunler
-            .Select(x => x.Id)
-            .ToList();
-
-        var teknikDetaylar = urunIdleri.Count == 0
-            ? new List<UrunDetayi>()
-            : await _dbContext.UrunDetaylari
+        var kategoriler =
+            await _dbContext.Kategoriler
                 .AsNoTracking()
-                .Where(x => urunIdleri.Contains(x.UrunId))
-                .OrderBy(x => x.UrunId)
-                .ThenBy(x => x.UrunDetayTanimiId)
-                .ThenBy(x => x.SiraNo)
-                .ThenBy(x => x.DetayDegeri)
-                .ToListAsync(cancellationToken);
+                .ToListAsync(
+                    cancellationToken);
 
-        var kategoriSozlugu = kategoriler
-            .ToDictionary(x => x.Id);
+        var urunler =
+            await _dbContext.Urunler
+                .AsNoTracking()
+                .OrderBy(x => x.SiraNo)
+                .ThenBy(x => x.UrunAdi)
+                .ToListAsync(
+                    cancellationToken);
 
-        var teknikDetaySozlugu = teknikDetaylar
-            .GroupBy(x => new
-            {
-                x.UrunId,
-                x.UrunDetayTanimiId
-            })
-            .ToDictionary(
-                x => (
-                    UrunId: x.Key.UrunId,
-                    TanimId: x.Key.UrunDetayTanimiId
-                ),
-                x => x
-                    .OrderBy(y => y.SiraNo)
-                    .ThenBy(y => y.DetayDegeri)
-                    .ToList());
+        var teknikOzellikler =
+            await _dbContext.UrunDetayTanimlari
+                .AsNoTracking()
+                .OrderBy(x => x.SiraNo)
+                .ThenBy(x => x.DetayAdi)
+                .ToListAsync(
+                    cancellationToken);
+
+        var urunIdleri =
+            urunler
+                .Select(x => x.Id)
+                .ToList();
+
+        var teknikDetaylar =
+            urunIdleri.Count == 0
+                ? new List<UrunDetayi>()
+                : await _dbContext.UrunDetaylari
+                    .AsNoTracking()
+                    .Where(x =>
+                        urunIdleri.Contains(
+                            x.UrunId))
+                    .OrderBy(x =>
+                        x.UrunId)
+                    .ThenBy(x =>
+                        x.UrunDetayTanimiId)
+                    .ThenBy(x =>
+                        x.SiraNo)
+                    .ThenBy(x =>
+                        x.DetayDegeri)
+                    .ToListAsync(
+                        cancellationToken);
+
+        var kategoriSozlugu =
+            kategoriler
+                .ToDictionary(
+                    x => x.Id);
+
+        var teknikDetaySozlugu =
+            teknikDetaylar
+                .GroupBy(x => new
+                {
+                    x.UrunId,
+                    x.UrunDetayTanimiId
+                })
+                .ToDictionary(
+                    x => (
+                        UrunId: x.Key.UrunId,
+                        TanimId: x.Key.UrunDetayTanimiId
+                    ),
+                    x => x
+                        .OrderBy(y =>
+                            y.SiraNo)
+                        .ThenBy(y =>
+                            y.DetayDegeri)
+                        .ToList());
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        using var workbook = new XLWorkbook();
+        using var workbook =
+            new XLWorkbook();
 
         UrunSayfasiniOlustur(
             workbook,
@@ -99,14 +122,19 @@ public class ExcelUrunExportServisi : IExcelUrunExportServisi
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        using var memoryStream = new MemoryStream();
+        using var memoryStream =
+            new MemoryStream();
 
-        workbook.SaveAs(memoryStream);
+        workbook.SaveAs(
+            memoryStream);
 
         return new ExcelDosyaDto
         {
-            DosyaAdi = $"ozmen-zimpara-market-urunler-{DateTime.UtcNow:yyyy-MM-dd}.xlsx",
-            Icerik = memoryStream.ToArray()
+            DosyaAdi =
+                $"ozmen-zimpara-market-urunler-{DateTime.UtcNow:yyyy-MM-dd}.xlsx",
+
+            Icerik =
+                memoryStream.ToArray()
         };
     }
 
@@ -118,40 +146,58 @@ public class ExcelUrunExportServisi : IExcelUrunExportServisi
         IReadOnlyDictionary<(int UrunId, int TanimId), List<UrunDetayi>> teknikDetaySozlugu,
         CancellationToken cancellationToken)
     {
-        var sayfa = workbook.Worksheets.Add("Ürünler");
+        var sayfa =
+            workbook.Worksheets.Add(
+                "Ürünler");
 
-        var sabitBasliklar = new[]
-        {
-            "Ürün Kodu *",
-            "Ürün Adı *",
-            "Kategori Yolu *",
-            "Satış Birimi *",
-            "Kısa Açıklama",
-            "Detaylı Açıklama",
-            "Görsel Yolu",
-            "SEO URL",
-            "SEO Başlığı",
-            "SEO Açıklaması",
-            "Öne Çıkan",
-            "Sıra No",
-            "Aktif"
-        };
+        var sabitBasliklar =
+            new[]
+            {
+                "Ürün Kodu",
+                "Ürün Adı *",
+                "Kategori Yolu *",
+                "Satış Birimi *",
+                "Kısa Açıklama",
+                "Detaylı Açıklama",
+                "Görsel Yolu",
+                "SEO URL",
+                "SEO Başlığı",
+                "SEO Açıklaması",
+                "Öne Çıkan",
+                "Sıra No",
+                "Aktif"
+            };
 
-        for (var index = 0; index < sabitBasliklar.Length; index++)
+        for (var index = 0;
+             index < sabitBasliklar.Length;
+             index++)
         {
-            sayfa.Cell(1, index + 1).Value = sabitBasliklar[index];
+            sayfa.Cell(
+                    1,
+                    index + 1)
+                .Value =
+                sabitBasliklar[index];
         }
 
-        for (var index = 0; index < teknikOzellikler.Count; index++)
+        for (var index = 0;
+             index < teknikOzellikler.Count;
+             index++)
         {
-            var kolon = sabitBasliklar.Length + index + 1;
+            var kolon =
+                sabitBasliklar.Length +
+                index +
+                1;
 
-            sayfa.Cell(1, kolon).Value =
+            sayfa.Cell(
+                    1,
+                    kolon)
+                .Value =
                 $"Özellik: {teknikOzellikler[index].DetayAdi}";
         }
 
         var toplamKolonSayisi =
-            sabitBasliklar.Length + teknikOzellikler.Count;
+            sabitBasliklar.Length +
+            teknikOzellikler.Count;
 
         BaslikStiliniUygula(
             sayfa,
@@ -159,15 +205,20 @@ public class ExcelUrunExportServisi : IExcelUrunExportServisi
             teknikOzellikler,
             toplamKolonSayisi);
 
-        for (var index = 0; index < urunler.Count; index++)
+        for (var index = 0;
+             index < urunler.Count;
+             index++)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var urun = urunler[index];
-            var satir = index + 2;
+            var urun =
+                urunler[index];
+
+            var satir =
+                index + 2;
 
             sayfa.Cell(satir, 1).Value =
-                urun.UrunKodu;
+                urun.UrunKodu ?? "";
 
             sayfa.Cell(satir, 2).Value =
                 urun.UrunAdi;
@@ -215,9 +266,13 @@ public class ExcelUrunExportServisi : IExcelUrunExportServisi
                     ? "Evet"
                     : "Hayır";
 
-            for (var teknikIndex = 0; teknikIndex < teknikOzellikler.Count; teknikIndex++)
+            for (var teknikIndex = 0;
+                 teknikIndex < teknikOzellikler.Count;
+                 teknikIndex++)
             {
-                var teknikOzellik = teknikOzellikler[teknikIndex];
+                var teknikOzellik =
+                    teknikOzellikler[
+                        teknikIndex];
 
                 var kolon =
                     sabitBasliklar.Length +
@@ -234,23 +289,32 @@ public class ExcelUrunExportServisi : IExcelUrunExportServisi
                     continue;
                 }
 
-                var deger = string.Join(
-                    " | ",
-                    detaylar
-                        .Select(x => x.DetayDegeri.Trim())
-                        .Where(x => !string.IsNullOrWhiteSpace(x)));
+                var deger =
+                    string.Join(
+                        " | ",
+                        detaylar
+                            .Select(x =>
+                                x.DetayDegeri.Trim())
+                            .Where(x =>
+                                !string.IsNullOrWhiteSpace(x)));
 
-                sayfa.Cell(satir, kolon).Value =
+                sayfa.Cell(
+                        satir,
+                        kolon)
+                    .Value =
                     deger;
             }
         }
 
-        sayfa.SheetView.FreezeRows(1);
+        sayfa.SheetView.FreezeRows(
+            1);
 
         sayfa.Range(
                 1,
                 1,
-                Math.Max(urunler.Count + 1, 2),
+                Math.Max(
+                    urunler.Count + 1,
+                    2),
                 toplamKolonSayisi)
             .SetAutoFilter();
 
@@ -261,11 +325,12 @@ public class ExcelUrunExportServisi : IExcelUrunExportServisi
 
         if (urunler.Count > 0)
         {
-            var veriAraligi = sayfa.Range(
-                2,
-                1,
-                urunler.Count + 1,
-                toplamKolonSayisi);
+            var veriAraligi =
+                sayfa.Range(
+                    2,
+                    1,
+                    urunler.Count + 1,
+                    toplamKolonSayisi);
 
             veriAraligi.Style.Alignment.Vertical =
                 XLAlignmentVerticalValues.Top;
@@ -281,11 +346,12 @@ public class ExcelUrunExportServisi : IExcelUrunExportServisi
         IReadOnlyList<UrunDetayTanimi> teknikOzellikler,
         int toplamKolonSayisi)
     {
-        var sabitBaslikAraligi = sayfa.Range(
-            1,
-            1,
-            1,
-            sabitKolonSayisi);
+        var sabitBaslikAraligi =
+            sayfa.Range(
+                1,
+                1,
+                1,
+                sabitKolonSayisi);
 
         sabitBaslikAraligi.Style.Font.Bold =
             true;
@@ -294,9 +360,12 @@ public class ExcelUrunExportServisi : IExcelUrunExportServisi
             XLColor.White;
 
         sabitBaslikAraligi.Style.Fill.BackgroundColor =
-            XLColor.FromHtml("#1E293B");
+            XLColor.FromHtml(
+                "#1E293B");
 
-        for (var index = 0; index < teknikOzellikler.Count; index++)
+        for (var index = 0;
+             index < teknikOzellikler.Count;
+             index++)
         {
             var kolon =
                 sabitKolonSayisi +
@@ -316,15 +385,18 @@ public class ExcelUrunExportServisi : IExcelUrunExportServisi
 
             hucre.Style.Fill.BackgroundColor =
                 teknikOzellikler[index].AktifMi
-                    ? XLColor.FromHtml("#6D28D9")
-                    : XLColor.FromHtml("#64748B");
+                    ? XLColor.FromHtml(
+                        "#6D28D9")
+                    : XLColor.FromHtml(
+                        "#64748B");
         }
 
-        var tumBaslikAraligi = sayfa.Range(
-            1,
-            1,
-            1,
-            toplamKolonSayisi);
+        var tumBaslikAraligi =
+            sayfa.Range(
+                1,
+                1,
+                1,
+                toplamKolonSayisi);
 
         tumBaslikAraligi.Style.Alignment.Vertical =
             XLAlignmentVerticalValues.Center;
@@ -355,11 +427,14 @@ public class ExcelUrunExportServisi : IExcelUrunExportServisi
         sayfa.Column(12).Width = 14;
         sayfa.Column(13).Width = 14;
 
-        for (var kolon = sabitKolonSayisi + 1;
+        for (var kolon =
+                 sabitKolonSayisi + 1;
              kolon <= toplamKolonSayisi;
              kolon++)
         {
-            sayfa.Column(kolon).Width =
+            sayfa.Column(
+                    kolon)
+                .Width =
                 30;
         }
     }
@@ -369,8 +444,9 @@ public class ExcelUrunExportServisi : IExcelUrunExportServisi
         IReadOnlyList<Kategori> kategoriler,
         CancellationToken cancellationToken)
     {
-        var sayfa = workbook.Worksheets.Add(
-            "Kategori Referansı");
+        var sayfa =
+            workbook.Worksheets.Add(
+                "Kategori Referansı");
 
         sayfa.Cell("A1").Value =
             "Kategori Yolu";
@@ -378,8 +454,9 @@ public class ExcelUrunExportServisi : IExcelUrunExportServisi
         sayfa.Cell("B1").Value =
             "Durum";
 
-        var baslik = sayfa.Range(
-            "A1:B1");
+        var baslik =
+            sayfa.Range(
+                "A1:B1");
 
         baslik.Style.Font.Bold =
             true;
@@ -388,27 +465,35 @@ public class ExcelUrunExportServisi : IExcelUrunExportServisi
             XLColor.White;
 
         baslik.Style.Fill.BackgroundColor =
-            XLColor.FromHtml("#1E293B");
+            XLColor.FromHtml(
+                "#1E293B");
 
         var kategoriSozlugu =
-            kategoriler.ToDictionary(
-                x => x.Id);
+            kategoriler
+                .ToDictionary(
+                    x => x.Id);
 
-        var satirlar = kategoriler
-            .Select(x => new
-            {
-                Kategori = x,
+        var satirlar =
+            kategoriler
+                .Select(x =>
+                    new
+                    {
+                        Kategori =
+                            x,
 
-                Yol = KategoriYoluOlustur(
-                    x,
-                    kategoriSozlugu)
-            })
-            .OrderBy(
-                x => x.Yol,
-                StringComparer.CurrentCultureIgnoreCase)
-            .ToList();
+                        Yol =
+                            KategoriYoluOlustur(
+                                x,
+                                kategoriSozlugu)
+                    })
+                .OrderBy(
+                    x => x.Yol,
+                    StringComparer.CurrentCultureIgnoreCase)
+                .ToList();
 
-        for (var index = 0; index < satirlar.Count; index++)
+        for (var index = 0;
+             index < satirlar.Count;
+             index++)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -438,7 +523,8 @@ public class ExcelUrunExportServisi : IExcelUrunExportServisi
         sayfa.Column("B").Width =
             16;
 
-        sayfa.SheetView.FreezeRows(1);
+        sayfa.SheetView.FreezeRows(
+            1);
 
         if (satirlar.Count > 0)
         {
@@ -456,20 +542,24 @@ public class ExcelUrunExportServisi : IExcelUrunExportServisi
         IReadOnlyList<UrunDetayTanimi> teknikOzellikler,
         CancellationToken cancellationToken)
     {
-        var sayfa = workbook.Worksheets.Add(
-            "Teknik Özellik Referansı");
+        var sayfa =
+            workbook.Worksheets.Add(
+                "Teknik Özellik Referansı");
 
-        var basliklar = new[]
-        {
-            "Özellik Adı",
-            "Çoklu Değer",
-            "Filtrede Göster",
-            "Sepette Seçilebilir",
-            "Sıra No",
-            "Durum"
-        };
+        var basliklar =
+            new[]
+            {
+                "Özellik Adı",
+                "Çoklu Değer",
+                "Filtrede Göster",
+                "Sepette Seçilebilir",
+                "Sıra No",
+                "Durum"
+            };
 
-        for (var index = 0; index < basliklar.Length; index++)
+        for (var index = 0;
+             index < basliklar.Length;
+             index++)
         {
             sayfa.Cell(
                     1,
@@ -478,11 +568,12 @@ public class ExcelUrunExportServisi : IExcelUrunExportServisi
                 basliklar[index];
         }
 
-        var baslik = sayfa.Range(
-            1,
-            1,
-            1,
-            basliklar.Length);
+        var baslik =
+            sayfa.Range(
+                1,
+                1,
+                1,
+                basliklar.Length);
 
         baslik.Style.Font.Bold =
             true;
@@ -491,9 +582,12 @@ public class ExcelUrunExportServisi : IExcelUrunExportServisi
             XLColor.White;
 
         baslik.Style.Fill.BackgroundColor =
-            XLColor.FromHtml("#6D28D9");
+            XLColor.FromHtml(
+                "#6D28D9");
 
-        for (var index = 0; index < teknikOzellikler.Count; index++)
+        for (var index = 0;
+             index < teknikOzellikler.Count;
+             index++)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -537,7 +631,8 @@ public class ExcelUrunExportServisi : IExcelUrunExportServisi
         sayfa.Column(5).Width = 14;
         sayfa.Column(6).Width = 14;
 
-        sayfa.SheetView.FreezeRows(1);
+        sayfa.SheetView.FreezeRows(
+            1);
 
         if (teknikOzellikler.Count > 0)
         {
@@ -578,19 +673,22 @@ public class ExcelUrunExportServisi : IExcelUrunExportServisi
             "Aktif Ürün";
 
         sayfa.Cell("B4").Value =
-            urunler.Count(x => x.AktifMi);
+            urunler.Count(
+                x => x.AktifMi);
 
         sayfa.Cell("A5").Value =
             "Pasif Ürün";
 
         sayfa.Cell("B5").Value =
-            urunler.Count(x => !x.AktifMi);
+            urunler.Count(
+                x => !x.AktifMi);
 
         sayfa.Cell("A6").Value =
             "Öne Çıkan Ürün";
 
         sayfa.Cell("B6").Value =
-            urunler.Count(x => x.OneCikanMi);
+            urunler.Count(
+                x => x.OneCikanMi);
 
         sayfa.Cell("A7").Value =
             "Teknik Özellik Tanımı";
@@ -610,11 +708,18 @@ public class ExcelUrunExportServisi : IExcelUrunExportServisi
         sayfa.Cell("B10").Value =
             "Pasif teknik özelliklerin başlıkları Ürünler sayfasında gri renkle gösterilir.";
 
+        sayfa.Cell("A11").Value =
+            "Not";
+
+        sayfa.Cell("B11").Value =
+            "Ürün Kodu alanı isteğe bağlıdır.";
+
         sayfa.Cell("A12").Value =
             "Oluşturulma Tarihi";
 
         sayfa.Cell("B12").Value =
-            DateTime.Now.ToString("dd.MM.yyyy HH:mm");
+            DateTime.Now.ToString(
+                "dd.MM.yyyy HH:mm");
 
         sayfa.Column("A").Width =
             30;
@@ -631,15 +736,17 @@ public class ExcelUrunExportServisi : IExcelUrunExportServisi
         Kategori kategori,
         IReadOnlyDictionary<int, Kategori> kategoriSozlugu)
     {
-        var yol = new List<string>
-        {
-            kategori.KategoriAdi
-        };
+        var yol =
+            new List<string>
+            {
+                kategori.KategoriAdi
+            };
 
-        var ziyaretEdilenler = new HashSet<int>
-        {
-            kategori.Id
-        };
+        var ziyaretEdilenler =
+            new HashSet<int>
+            {
+                kategori.Id
+            };
 
         var ustKategoriId =
             kategori.UstKategoriId;

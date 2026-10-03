@@ -1,56 +1,85 @@
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import DataTable from "../../ui/DataTable";
+
+import GorselOnizlemeModal from "../../ui/GorselOnizlemeModal";
+
 import Select from "../../ui/Select";
 
-import {
-  satisBirimiSecenekleri,
-  satisBirimiAdiGetir,
-} from "./urunYardimcilari";
+import { satisBirimiSecenekleri, satisBirimiAdiGetir } from "./urunYardimcilari";
 
-import {
-  urunDurumSecenekleri,
-  urunOneCikanSecenekleri,
-  urunSiralamaSecenekleri,
-} from "./useUrunYonetimi";
+import { urunDurumSecenekleri, urunOneCikanSecenekleri, urunSiralamaSecenekleri } from "./useUrunYonetimi";
 
 export default function UrunListesi({
   urunler = [],
+
   filtreler,
+
   sayfalama,
 
   kategoriSecenekleri = [],
 
   yukleniyorMu = false,
+
   durumDegistirilenUrunId = null,
+  oneCikanDegistirilenUrunId = null,
 
   seciliUrunIdleri = [],
+
   topluSilmeDevamEdiyor = false,
 
   filtreDegistir,
+
   filtreleriTemizle,
 
   sayfaDegistir,
+
   sayfaBoyutuDegistir,
 
   urunDurumunuDegistir,
+  urunOneCikanDurumunuDegistir,
 
   urunSecimleriDegisti,
+
   topluSilmeModaliniAc,
 
   onUrunDetay,
+
   onUrunDuzenle,
+
   silmeModaliniAc,
 }) {
+  const [gorselOnizleme, setGorselOnizleme] = useState(null);
+
+  const gorselOnizlemeyiAc = useCallback((urun) => {
+    const gorselUrl = urunGorselUrlOlustur(urun?.gorselYolu);
+
+    if (!gorselUrl) {
+      return;
+    }
+
+    setGorselOnizleme({
+      src: gorselUrl,
+      alt: urun?.urunAdi || "Ürün görseli",
+      baslik: urun?.urunAdi || "",
+    });
+  }, []);
+
+  const gorselOnizlemeyiKapat = useCallback(() => {
+    setGorselOnizleme(null);
+  }, []);
+
   const kategoriFiltreSecenekleri = useMemo(
     () => [
       {
         value: "tum",
+
         label: "Tüm Kategoriler",
       },
 
       ...kategoriFiltreSecenekleriniOlustur(kategoriSecenekleri),
     ],
+
     [kategoriSecenekleri],
   );
 
@@ -58,11 +87,13 @@ export default function UrunListesi({
     () => [
       {
         value: "tum",
+
         label: "Tüm Birimler",
       },
 
       ...satisBirimiSecenekleri,
     ],
+
     [],
   );
 
@@ -77,41 +108,59 @@ export default function UrunListesi({
     () => [
       {
         key: "urun",
+
         header: "Ürün",
+
         width: "310px",
-        render: (urun) => <UrunBilgisi urun={urun} />,
+
+        render: (urun) => <UrunBilgisi urun={urun} onGorselAc={() => gorselOnizlemeyiAc(urun)} />,
       },
 
       {
         key: "kategori",
+
         header: "Kategori",
+
         width: "180px",
+
         render: (urun) => (
           <div>
-            <span className="line-clamp-2 text-sm font-bold text-text-primary">
-              {urun.kategoriAdi || "-"}
-            </span>
+            <span className="line-clamp-2 text-sm font-bold text-text-primary">{urun.kategoriAdi || "-"}</span>
           </div>
         ),
       },
 
       {
         key: "satisBirimi",
+
         header: "Satış Birimi",
+
         width: "130px",
+
         render: (urun) => (
           <span
             className="
+
               inline-flex
+
               rounded-lg
+
               border
+
               border-border
+
               bg-surface-soft
+
               px-2.5
+
               py-1.5
+
               text-xs
+
               font-bold
+
               text-text-secondary
+
             "
           >
             {urun.satisBirimiAdi || satisBirimiAdiGetir(urun.satisBirimi)}
@@ -121,58 +170,44 @@ export default function UrunListesi({
 
       {
         key: "teknikDetay",
+
         header: "Özellik",
+
         width: "110px",
-        render: (urun) => (
-          <TeknikDetaySayisi sayi={urun.teknikDetaySayisi ?? 0} />
-        ),
+
+        render: (urun) => <TeknikDetaySayisi sayi={urun.teknikDetaySayisi ?? 0} />,
       },
 
       {
         key: "siraNo",
+
         header: "Sıra",
+
         width: "80px",
-        render: (urun) => (
-          <span className="font-bold text-text-secondary">
-            {urun.siraNo ?? 0}
-          </span>
-        ),
+
+        render: (urun) => <span className="font-bold text-text-secondary">{urun.siraNo ?? 0}</span>,
       },
 
       {
         key: "oneCikanMi",
         header: "Öne Çıkan",
-        width: "115px",
-        render: (urun) =>
-          urun.oneCikanMi ? (
-            <span
-              className="
-                inline-flex
-                items-center
-                gap-1.5
-                rounded-full
-                border
-                border-amber-200
-                bg-amber-50
-                px-2.5
-                py-1
-                text-xs
-                font-extrabold
-                text-amber-700
-              "
-            >
-              <StarIcon />
-              Evet
-            </span>
-          ) : (
-            <span className="text-xs font-semibold text-text-muted">Hayır</span>
-          ),
+        width: "130px",
+        render: (urun) => (
+          <OneCikanButonu
+            urun={urun}
+            loading={oneCikanDegistirilenUrunId === urun.id}
+            onClick={() => urunOneCikanDurumunuDegistir(urun)}
+          />
+        ),
       },
 
       {
         key: "aktifMi",
+
         header: "Durum",
+
         width: "130px",
+
         render: (urun) => (
           <DurumButonu
             urun={urun}
@@ -184,10 +219,15 @@ export default function UrunListesi({
 
       {
         key: "islemler",
+
         header: "İşlemler",
+
         width: "160px",
+
         headerClassName: "text-right",
+
         cellClassName: "text-right",
+
         render: (urun) => (
           <IslemButonlari
             onDetail={() => onUrunDetay?.(urun)}
@@ -197,13 +237,8 @@ export default function UrunListesi({
         ),
       },
     ],
-    [
-      durumDegistirilenUrunId,
-      onUrunDetay,
-      onUrunDuzenle,
-      silmeModaliniAc,
-      urunDurumunuDegistir,
-    ],
+
+    [durumDegistirilenUrunId, gorselOnizlemeyiAc, onUrunDetay, onUrunDuzenle, silmeModaliniAc, urunDurumunuDegistir],
   );
 
   const toolbarRight = (
@@ -253,24 +288,41 @@ export default function UrunListesi({
           type="button"
           onClick={filtreleriTemizle}
           className="
+
             inline-flex
+
             h-11
+
             items-center
+
             justify-center
+
             gap-2
+
             rounded-ui
+
             border
+
             border-border
+
             bg-white
+
             px-3.5
+
             text-xs
+
             font-extrabold
+
             text-text-secondary
+
             transition
 
             hover:border-red-200
+
             hover:bg-red-50
+
             hover:text-red-600
+
           "
         >
           <FilterCloseIcon />
@@ -281,72 +333,84 @@ export default function UrunListesi({
   );
 
   return (
-    <DataTable
-      data={urunler}
-      columns={columns}
-      selectable
-      selectedRowIds={seciliUrunIdleri}
-      onSelectionChange={urunSecimleriDegisti}
-      isRowSelectable={() => !topluSilmeDevamEdiyor}
-      bulkActions={({ selectedCount }) => (
-        <button
-          type="button"
-          disabled={topluSilmeDevamEdiyor || selectedCount === 0}
-          onClick={topluSilmeModaliniAc}
-          className="
-            inline-flex
-            h-9
-            items-center
-            justify-center
-            gap-2
-            rounded-ui
-            border
-            border-red-200
-            bg-red-50
-            px-3.5
-            text-xs
-            font-extrabold
-            text-red-600
-            transition-all
+    <>
+      <DataTable
+        data={urunler}
+        columns={columns}
+        selectable
+        selectedRowIds={seciliUrunIdleri}
+        onSelectionChange={urunSecimleriDegisti}
+        isRowSelectable={() => !topluSilmeDevamEdiyor}
+        bulkActions={({ selectedCount }) => (
+          <button
+            type="button"
+            disabled={topluSilmeDevamEdiyor || selectedCount === 0}
+            onClick={topluSilmeModaliniAc}
+            className="
+              inline-flex
+              h-9
+              items-center
+              justify-center
+              gap-2
+              rounded-ui
+              border
+              border-red-200
+              bg-red-50
+              px-3.5
+              text-xs
+              font-extrabold
+              text-red-600
+              transition-all
 
-            hover:border-red-300
-            hover:bg-red-100
+              hover:border-red-300
+              hover:bg-red-100
 
-            disabled:cursor-not-allowed
-            disabled:opacity-50
-          "
-        >
-          {topluSilmeDevamEdiyor ? <LoadingIcon /> : <TrashIcon />}
-          {selectedCount} Kaydı Sil
-        </button>
-      )}
-      searchValue={filtreler.aramaMetni}
-      onSearchChange={(value) => filtreDegistir("aramaMetni", value)}
-      searchPlaceholder="Ürün adı, ürün kodu veya özellik ara..."
-      toolbarRight={toolbarRight}
-      paginationMode="server"
-      currentPage={sayfalama.sayfaNo}
-      pageSize={sayfalama.sayfaBoyutu}
-      totalItems={sayfalama.toplamKayitSayisi}
-      totalPages={sayfalama.toplamSayfaSayisi}
-      onPageChange={sayfaDegistir}
-      onPageSizeChange={sayfaBoyutuDegistir}
-      pageSizeOptions={[10, 20, 50]}
-      hasActiveFilters={aktifFiltreVarMi}
-      onClearFilters={filtreleriTemizle}
-      loading={yukleniyorMu}
-      tableMinWidth="1300px"
-      rowClassName={(urun) => (urun.aktifMi ? "" : "bg-slate-50/50")}
-      emptyTitle="Henüz ürün bulunmuyor"
-      emptyDescription="Ürün kataloğunuzda henüz herhangi bir ürün bulunmuyor."
-      noResultTitle="Ürün bulunamadı"
-      noResultDescription="Arama veya filtre kriterlerinize uygun bir ürün bulunamadı."
-    />
+              disabled:cursor-not-allowed
+              disabled:opacity-50
+            "
+          >
+            {topluSilmeDevamEdiyor ? <LoadingIcon /> : <TrashIcon />}
+            {selectedCount} Kaydı Sil
+          </button>
+        )}
+        searchValue={filtreler.aramaMetni}
+        onSearchChange={(value) => filtreDegistir("aramaMetni", value)}
+        searchPlaceholder="Ürün adı, ürün kodu veya özellik ara..."
+        toolbarRight={toolbarRight}
+        paginationMode="server"
+        currentPage={sayfalama.sayfaNo}
+        pageSize={sayfalama.sayfaBoyutu}
+        totalItems={sayfalama.toplamKayitSayisi}
+        totalPages={sayfalama.toplamSayfaSayisi}
+        onPageChange={sayfaDegistir}
+        onPageSizeChange={sayfaBoyutuDegistir}
+        pageSizeOptions={[10, 20, 50]}
+        hasActiveFilters={aktifFiltreVarMi}
+        onClearFilters={filtreleriTemizle}
+        loading={yukleniyorMu}
+        tableMinWidth="1300px"
+        rowClassName={(urun) => (urun.aktifMi ? "" : "bg-slate-50/50")}
+        emptyTitle="Henüz ürün bulunmuyor"
+        emptyDescription="Ürün kataloğunuzda henüz herhangi bir ürün bulunmuyor."
+        noResultTitle="Ürün bulunamadı"
+        noResultDescription="Arama veya filtre kriterlerinize uygun bir ürün bulunamadı."
+      />
+
+      <GorselOnizlemeModal
+        open={Boolean(gorselOnizleme)}
+        src={gorselOnizleme?.src}
+        alt={gorselOnizleme?.alt}
+        baslik={gorselOnizleme?.baslik}
+        onClose={gorselOnizlemeyiKapat}
+      />
+    </>
   );
 }
 
-function UrunBilgisi({ urun }) {
+function UrunBilgisi({ urun, onGorselAc }) {
   const gorselUrl = urunGorselUrlOlustur(urun.gorselYolu);
+
+  const urunKodu = typeof urun.urunKodu === "string" ? urun.urunKodu.trim() : "";
 
   return (
     <div
@@ -357,37 +421,70 @@ function UrunBilgisi({ urun }) {
         gap-3
       "
     >
-      <div
-        className="
-          relative
-          flex
-          h-12
-          w-12
-          shrink-0
-          items-center
-          justify-center
-          overflow-hidden
-          rounded-xl
-          border
-          border-border
-          bg-surface-soft
-        "
-      >
-        {gorselUrl ? (
+      {gorselUrl ? (
+        <button
+          type="button"
+          onClick={onGorselAc}
+          title="Görseli büyüt"
+          aria-label={`${urun.urunAdi} görselini büyüt`}
+          className="
+            group/gorsel
+            relative
+            flex
+            h-12
+            w-12
+            shrink-0
+            cursor-zoom-in
+            items-center
+            justify-center
+            overflow-hidden
+            rounded-xl
+            border
+            border-border
+            bg-white
+            transition-all
+
+            hover:border-brand-blue/30
+            hover:shadow-[0_5px_15px_rgba(37,99,235,0.12)]
+          "
+        >
           <img
             src={gorselUrl}
-            alt=""
+            alt={urun.urunAdi}
             loading="lazy"
             className="
               h-full
               w-full
-              object-cover
+              object-contain
+              object-center
+              p-0.5
+              transition-transform
+              duration-300
+
+              group-hover/gorsel:scale-[1.08]
             "
           />
-        ) : (
+        </button>
+      ) : (
+        <div
+          className="
+            relative
+            flex
+            h-12
+            w-12
+            shrink-0
+            items-center
+            justify-center
+            overflow-hidden
+            rounded-xl
+            border
+            border-border
+            bg-surface-soft
+          "
+        >
           <ProductIcon />
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="min-w-0">
         <p
@@ -402,28 +499,30 @@ function UrunBilgisi({ urun }) {
           {urun.urunAdi}
         </p>
 
-        <div
-          className="
-            mt-1
-            flex
-            min-w-0
-            items-center
-            gap-2
-          "
-        >
-          <span
+        {(urunKodu || urun.oneCikanMi) && (
+          <div
             className="
-              truncate
-              text-xs
-              font-semibold
-              text-text-muted
+              mt-1
+              flex
+              min-w-0
+              items-center
+              gap-2
             "
           >
-            {urun.urunKodu}
-          </span>
+            {urunKodu && (
+              <span
+                className="
+                  truncate
+                  text-xs
+                  font-semibold
+                  text-text-muted
+                "
+              >
+                {urunKodu}
+              </span>
+            )}
 
-          {urun.oneCikanMi && (
-            <>
+            {urunKodu && urun.oneCikanMi && (
               <span
                 className="
                   h-1
@@ -433,7 +532,9 @@ function UrunBilgisi({ urun }) {
                   bg-slate-300
                 "
               />
+            )}
 
+            {urun.oneCikanMi && (
               <span
                 className="
                   whitespace-nowrap
@@ -444,9 +545,9 @@ function UrunBilgisi({ urun }) {
               >
                 Öne çıkan
               </span>
-            </>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -456,21 +557,34 @@ function TeknikDetaySayisi({ sayi }) {
   return (
     <div
       className="
+
         inline-flex
+
         items-center
+
         gap-2
+
       "
     >
       <div
         className="
+
           flex
+
           h-8
+
           w-8
+
           items-center
+
           justify-center
+
           rounded-lg
+
           bg-indigo-50
+
           text-indigo-600
+
         "
       >
         <SlidersIcon />
@@ -479,10 +593,15 @@ function TeknikDetaySayisi({ sayi }) {
       <div>
         <p
           className="
+
             text-sm
+
             font-extrabold
+
             leading-none
+
             text-text-primary
+
           "
         >
           {sayi}
@@ -490,11 +609,17 @@ function TeknikDetaySayisi({ sayi }) {
 
         <p
           className="
+
             mt-1
+
             whitespace-nowrap
+
             text-[10px]
+
             font-semibold
+
             text-text-muted
+
           "
         >
           değer
@@ -514,39 +639,61 @@ function DurumButonu({ urun, loading, onClick }) {
       onClick={onClick}
       title={aktifMi ? "Pasif hale getir" : "Aktif hale getir"}
       className={`
+
         inline-flex
+
         min-w-[86px]
+
         items-center
+
         justify-center
+
         gap-2
+
         rounded-full
+
         border
+
         px-3
+
         py-1.5
+
         text-xs
+
         font-extrabold
+
         transition
 
         disabled:cursor-wait
+
         disabled:opacity-60
 
         ${
           aktifMi
             ? `
+
               border-emerald-200
+
               bg-emerald-50
+
               text-emerald-700
 
               hover:bg-emerald-100
+
             `
             : `
+
               border-slate-200
+
               bg-slate-100
+
               text-slate-600
 
               hover:bg-slate-200
+
             `
         }
+
       `}
     >
       {loading ? (
@@ -554,11 +701,15 @@ function DurumButonu({ urun, loading, onClick }) {
       ) : (
         <span
           className={`
+
             h-2
+
             w-2
+
             rounded-full
 
             ${aktifMi ? "bg-emerald-500" : "bg-slate-400"}
+
           `}
         />
       )}
@@ -572,10 +723,15 @@ function IslemButonlari({ onDetail, onEdit, onDelete }) {
   return (
     <div
       className="
+
         flex
+
         items-center
+
         justify-end
+
         gap-1.5
+
       "
     >
       <button
@@ -584,21 +740,35 @@ function IslemButonlari({ onDetail, onEdit, onDelete }) {
         title="Ürün detayını görüntüle"
         aria-label="Ürün detayını görüntüle"
         className="
+
           flex
+
           h-9
+
           w-9
+
           items-center
+
           justify-center
+
           rounded-lg
+
           border
+
           border-border
+
           bg-white
+
           text-text-muted
+
           transition
 
           hover:border-indigo-200
+
           hover:bg-indigo-50
+
           hover:text-indigo-600
+
         "
       >
         <EyeIcon />
@@ -610,21 +780,35 @@ function IslemButonlari({ onDetail, onEdit, onDelete }) {
         title="Ürünü düzenle"
         aria-label="Ürünü düzenle"
         className="
+
           flex
+
           h-9
+
           w-9
+
           items-center
+
           justify-center
+
           rounded-lg
+
           border
+
           border-border
+
           bg-white
+
           text-text-muted
+
           transition
 
           hover:border-brand-blue/30
+
           hover:bg-brand-blue/[0.05]
+
           hover:text-brand-blue
+
         "
       >
         <EditIcon />
@@ -636,21 +820,35 @@ function IslemButonlari({ onDetail, onEdit, onDelete }) {
         title="Ürünü sil"
         aria-label="Ürünü sil"
         className="
+
           flex
+
           h-9
+
           w-9
+
           items-center
+
           justify-center
+
           rounded-lg
+
           border
+
           border-border
+
           bg-white
+
           text-text-muted
+
           transition
 
           hover:border-red-200
+
           hover:bg-red-50
+
           hover:text-red-600
+
         "
       >
         <TrashIcon />
@@ -698,25 +896,19 @@ function ProductIcon() {
       viewBox="0 0 24 24"
       fill="none"
       className="
+
         h-5
+
         w-5
+
         text-text-muted
+
       "
       aria-hidden="true"
     >
-      <path
-        d="M5 7.5 12 4l7 3.5v9L12 20l-7-3.5v-9Z"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinejoin="round"
-      />
+      <path d="M5 7.5 12 4l7 3.5v9L12 20l-7-3.5v-9Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
 
-      <path
-        d="m5 7.5 7 3.5 7-3.5M12 11v9"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinejoin="round"
-      />
+      <path d="m5 7.5 7 3.5 7-3.5M12 11v9" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -736,12 +928,7 @@ function SlidersIcon() {
 
 function StarIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className="h-3.5 w-3.5"
-      aria-hidden="true"
-    >
+    <svg viewBox="0 0 24 24" fill="currentColor" className="h-3.5 w-3.5" aria-hidden="true">
       <path d="m12 2.75 2.77 5.62 6.2.9-4.49 4.37 1.06 6.18L12 16.9l-5.54 2.92 1.06-6.18-4.49-4.37 6.2-.9L12 2.75Z" />
     </svg>
   );
@@ -797,27 +984,19 @@ function LoadingIcon() {
       viewBox="0 0 24 24"
       fill="none"
       className="
+
         h-3.5
+
         w-3.5
+
         animate-spin
+
       "
       aria-hidden="true"
     >
-      <circle
-        cx="12"
-        cy="12"
-        r="9"
-        stroke="currentColor"
-        strokeWidth="3"
-        className="opacity-25"
-      />
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="3" className="opacity-25" />
 
-      <path
-        d="M21 12a9 9 0 0 0-9-9"
-        stroke="currentColor"
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
+      <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
     </svg>
   );
 }
@@ -825,19 +1004,9 @@ function LoadingIcon() {
 function FilterCloseIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden="true">
-      <path
-        d="M4 5h16M7 12h10M10 19h4"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-      />
+      <path d="M4 5h16M7 12h10M10 19h4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
 
-      <path
-        d="m17 16 4 4m0-4-4 4"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-      />
+      <path d="m17 16 4 4m0-4-4 4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
     </svg>
   );
 }
@@ -848,6 +1017,7 @@ function kategoriFiltreSecenekleriniOlustur(kategoriSecenekleri) {
   }
 
   const kategoriler = kategoriSecenekleri
+
     .map((kategori) => {
       const id = kategori.id ?? kategori.value;
 
@@ -861,9 +1031,7 @@ function kategoriFiltreSecenekleriniOlustur(kategoriSecenekleri) {
         kategoriAdi: String(kategoriAdi).trim(),
 
         ustKategoriId:
-          kategori.ustKategoriId !== undefined &&
-          kategori.ustKategoriId !== null &&
-          kategori.ustKategoriId !== ""
+          kategori.ustKategoriId !== undefined && kategori.ustKategoriId !== null && kategori.ustKategoriId !== ""
             ? Number(kategori.ustKategoriId)
             : null,
 
@@ -872,12 +1040,8 @@ function kategoriFiltreSecenekleriniOlustur(kategoriSecenekleri) {
         aktifMi: kategori.aktifMi !== false,
       };
     })
-    .filter(
-      (kategori) =>
-        Number.isInteger(kategori.id) &&
-        kategori.id > 0 &&
-        kategori.kategoriAdi,
-    );
+
+    .filter((kategori) => Number.isInteger(kategori.id) && kategori.id > 0 && kategori.kategoriAdi);
 
   const kategoriIdleri = new Set(kategoriler.map((kategori) => kategori.id));
 
@@ -887,11 +1051,7 @@ function kategoriFiltreSecenekleriniOlustur(kategoriSecenekleri) {
     const ustKategoriId = kategori.ustKategoriId;
 
     const gecerliUstKategoriId =
-      ustKategoriId &&
-      kategoriIdleri.has(ustKategoriId) &&
-      ustKategoriId !== kategori.id
-        ? ustKategoriId
-        : null;
+      ustKategoriId && kategoriIdleri.has(ustKategoriId) && ustKategoriId !== kategori.id ? ustKategoriId : null;
 
     if (!altKategoriSozlugu.has(gecerliUstKategoriId)) {
       altKategoriSozlugu.set(gecerliUstKategoriId, []);
@@ -929,9 +1089,7 @@ function kategoriFiltreSecenekleriniOlustur(kategoriSecenekleri) {
 
     const altKategoriler = altKategoriSozlugu.get(kategori.id) ?? [];
 
-    altKategoriler.forEach((altKategori) =>
-      kategoriEkle(altKategori, seviye + 1),
-    );
+    altKategoriler.forEach((altKategori) => kategoriEkle(altKategori, seviye + 1));
   }
 
   const kokKategoriler = altKategoriSozlugu.get(null) ?? [];
@@ -939,12 +1097,19 @@ function kategoriFiltreSecenekleriniOlustur(kategoriSecenekleri) {
   kokKategoriler.forEach((kategori) => kategoriEkle(kategori, 0));
 
   /*
+
    * Parent ilişkisi bozuk olan kategorilerin
+
    * filtreden tamamen kaybolmasını engeller.
+
    */
+
   kategoriler
+
     .filter((kategori) => !ziyaretEdilenler.has(kategori.id))
+
     .sort(kategoriFiltreSirala)
+
     .forEach((kategori) => kategoriEkle(kategori, 0));
 
   return sonuc;
@@ -968,4 +1133,56 @@ function kategoriFiltreSirala(a, b) {
   return a.kategoriAdi.localeCompare(b.kategoriAdi, "tr", {
     sensitivity: "base",
   });
+}
+
+function OneCikanButonu({ urun, loading, onClick }) {
+  const oneCikanMi = Boolean(urun.oneCikanMi);
+
+  return (
+    <button
+      type="button"
+      disabled={loading}
+      onClick={onClick}
+      title={oneCikanMi ? "Öne çıkanlardan kaldır" : "Öne çıkanlara ekle"}
+      className={`
+        inline-flex
+        min-w-[92px]
+        items-center
+        justify-center
+        gap-2
+        rounded-full
+        border
+        px-3
+        py-1.5
+        text-xs
+        font-extrabold
+        transition
+
+        disabled:cursor-wait
+        disabled:opacity-60
+
+        ${
+          oneCikanMi
+            ? `
+                border-amber-200
+                bg-amber-50
+                text-amber-700
+
+                hover:bg-amber-100
+              `
+            : `
+                border-slate-200
+                bg-slate-100
+                text-slate-600
+
+                hover:bg-slate-200
+              `
+        }
+      `}
+    >
+      {loading ? <LoadingIcon /> : <StarIcon />}
+
+      {oneCikanMi ? "Evet" : "Hayır"}
+    </button>
+  );
 }

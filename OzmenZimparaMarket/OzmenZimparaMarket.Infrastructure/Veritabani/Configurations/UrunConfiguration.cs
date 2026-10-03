@@ -18,7 +18,7 @@ public class UrunConfiguration : IEntityTypeConfiguration<Urun>
 
         builder.Property(x => x.UrunAdi).IsRequired().HasMaxLength(200);
 
-        builder.Property(x => x.UrunKodu).IsRequired().HasMaxLength(100);
+        builder.Property(x => x.UrunKodu).IsRequired(false).HasMaxLength(100);
 
         builder.Property(x => x.KisaAciklama).IsRequired(false).HasColumnType("text");
 

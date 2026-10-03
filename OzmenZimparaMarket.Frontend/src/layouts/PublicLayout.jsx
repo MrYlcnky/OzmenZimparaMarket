@@ -1,19 +1,43 @@
 import { Outlet } from "react-router";
 
-import PublicFooter from "../components/ui/PublicFooter";
-import PublicHeader from "../components/ui/PublicHeader";
+import PublicSiteProvider from "../contexts/PublicSiteProvider";
+import TeklifSepetiProvider from "../contexts/TeklifSepetiProvider";
+
+import PublicHeader from "../components/public/layout/PublicHeader";
+import PublicFooter from "../components/public/layout/PublicFooter";
+
+import ScrollToTop from "../components/common/ScrollToTop";
 
 function PublicLayout() {
   return (
-    <div className="flex min-h-screen flex-col bg-surface text-text-primary">
-      <PublicHeader />
+    <PublicSiteProvider>
+      <TeklifSepetiProvider>
+        <div
+          className="
+            flex
+            min-h-screen
+            flex-col
+            bg-[#050711]
+            text-white
+          "
+        >
+          <ScrollToTop />
 
-      <main className="flex-1">
-        <Outlet />
-      </main>
+          <PublicHeader />
 
-      <PublicFooter />
-    </div>
+          <main
+            className="
+              relative
+              flex-1
+            "
+          >
+            <Outlet />
+          </main>
+
+          <PublicFooter />
+        </div>
+      </TeklifSepetiProvider>
+    </PublicSiteProvider>
   );
 }
 

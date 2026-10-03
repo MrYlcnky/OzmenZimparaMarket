@@ -10,7 +10,6 @@ import AnaSayfa from "./pages/public/AnaSayfa";
 import HakkimizdaSayfasi from "./pages/public/HakkimizdaSayfasi";
 import IletisimSayfasi from "./pages/public/IletisimSayfasi";
 import UrunDetaySayfasi from "./pages/public/UrunDetaySayfasi";
-import UrunlerSayfasi from "./pages/public/UrunlerSayfasi";
 
 import GirisSayfasi from "./pages/yonetim/GirisSayfasi";
 import YonetimAnaSayfa from "./pages/yonetim/YonetimAnaSayfa";
@@ -19,6 +18,11 @@ import KategoriYonetimiSayfasi from "./pages/yonetim/KategoriYonetimiSayfasi";
 import UrunOzellikleriYonetimiSayfasi from "./pages/yonetim/UrunOzellikleriYonetimiSayfasi";
 import UrunYonetimiSayfasi from "./pages/yonetim/UrunYonetimiSayfasi";
 import KullaniciYonetimiSayfasi from "./pages/yonetim/KullaniciYonetimiSayfasi";
+import TeklifSepetiSayfasi from "./pages/public/TeklifSepetiSayfasi";
+import UrunlerSayfasi from "./pages/public/UrunlerSayfasi";
+import VizyonMisyonStratejiSayfasi from "./pages/public/VizyonMisyonStratejiSayfasi";
+import KalitePolitikasiSayfasi from "./pages/public/KalitePolitikasiSayfasi";
+import KvkkSayfasi from "./pages/public/KvkkSayfasi";
 
 import NotFoundPage from "./pages/NotFoundPage";
 
@@ -30,13 +34,22 @@ function App() {
         <Route path="/" element={<PublicLayout />}>
           <Route index element={<AnaSayfa />} />
 
+          <Route path="urunler/:seoUrl" element={<UrunDetaySayfasi />} />
           <Route path="urunler" element={<UrunlerSayfasi />} />
 
-          <Route path="urunler/:seoUrl" element={<UrunDetaySayfasi />} />
-
           <Route path="hakkimizda" element={<HakkimizdaSayfasi />} />
-
+          <Route
+            path="vizyon-misyon-strateji"
+            element={<VizyonMisyonStratejiSayfasi />}
+          />
+          <Route
+            path="kalite-politikasi"
+            element={<KalitePolitikasiSayfasi />}
+          />
+          <Route path="kvkk" element={<KvkkSayfasi />} />
           <Route path="iletisim" element={<IletisimSayfasi />} />
+
+          <Route path="teklif-sepeti" element={<TeklifSepetiSayfasi />} />
         </Route>
 
         {/* Yönetim giriş */}

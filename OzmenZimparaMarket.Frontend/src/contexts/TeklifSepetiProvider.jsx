@@ -77,12 +77,15 @@ function sepetSatiriniNormalizeEt(satir) {
     urunAdi: String(satir?.urunAdi ?? ""),
 
     urunKodu: String(satir?.urunKodu ?? ""),
+    kategoriAdi: String(satir?.kategoriAdi ?? ""),
 
     seoUrl: String(satir?.seoUrl ?? ""),
 
     gorselYolu: satir?.gorselYolu ?? null,
 
     satisBirimi: satir?.satisBirimi ?? null,
+
+    satisBirimiAdi: String(satir?.satisBirimiAdi ?? ""),
 
     miktar: pozitifSayiGetir(satir?.miktar),
 
@@ -157,6 +160,19 @@ function TeklifSepetiProvider({ children }) {
             ? {
                 ...satir,
 
+                urunAdi: urun?.urunAdi ?? satir.urunAdi,
+
+                urunKodu: urun?.urunKodu ?? satir.urunKodu,
+                kategoriAdi: urun?.kategoriAdi ?? satir.kategoriAdi,
+
+                seoUrl: urun?.seoUrl ?? satir.seoUrl,
+
+                gorselYolu: urun?.gorselYolu ?? satir.gorselYolu,
+
+                satisBirimi: urun?.satisBirimi ?? satir.satisBirimi,
+
+                satisBirimiAdi: urun?.satisBirimiAdi ?? satir.satisBirimiAdi,
+
                 miktar: satir.miktar + eklenecekMiktar,
               }
             : satir,
@@ -174,12 +190,15 @@ function TeklifSepetiProvider({ children }) {
           urunAdi: urun?.urunAdi ?? "",
 
           urunKodu: urun?.urunKodu ?? "",
+          kategoriAdi: urun?.kategoriAdi ?? "",
 
           seoUrl: urun?.seoUrl ?? "",
 
           gorselYolu: urun?.gorselYolu ?? null,
 
           satisBirimi: urun?.satisBirimi ?? null,
+
+          satisBirimiAdi: urun?.satisBirimiAdi ?? "",
 
           miktar: eklenecekMiktar,
 

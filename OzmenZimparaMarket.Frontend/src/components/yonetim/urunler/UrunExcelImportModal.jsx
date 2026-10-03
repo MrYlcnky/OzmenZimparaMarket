@@ -292,13 +292,15 @@ function ImportKurallari() {
 
           <p
             className="
-              mt-1
-              text-xs
-              leading-5
-              text-text-secondary
-            "
+    mt-1
+    text-xs
+    leading-5
+    text-text-secondary
+  "
           >
-            Sistemde aynı ürün kodu zaten varsa ürün güncellenmez ve
+            Ürün kodu isteğe bağlıdır. Ürün kodu girilmişse sistemde aynı kodun
+            bulunup bulunmadığı kontrol edilir. Ürün kodu olmayan kayıtlarda
+            mevcut ürün kontrolü SEO URL üzerinden yapılır. Mevcut ürünler
             <strong> Mevcut</strong> olarak atlanır. Kategori yolu sistemde
             bulunmayan yeni ürünler eklenmez. Hatalı bir yeni ürün satırı varsa
             gerçek aktarım başlatılamaz.

@@ -24,7 +24,7 @@ public class ExcelUrunImportServisi : IExcelUrunImportServisi
 
     private static readonly string[] SabitBasliklar =
     {
-        "Ürün Kodu *",
+        "Ürün Kodu",
         "Ürün Adı *",
         "Kategori Yolu *",
         "Satış Birimi *",
@@ -137,20 +137,22 @@ public class ExcelUrunImportServisi : IExcelUrunImportServisi
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
-        var mevcutUrunSozlugu =
+        var mevcutUrunKoduSozlugu =
             mevcutUrunler
+                .Where(x =>
+                    !string.IsNullOrWhiteSpace(
+                        x.UrunKodu))
                 .ToDictionary(
-                    x => x.UrunKodu,
+                    x => x.UrunKodu!,
                     UrunKoduKarsilastiricisi);
 
-        var mevcutSeoUrlSahipleri =
+        var mevcutSeoUrlSozlugu =
             mevcutUrunler
                 .Where(x =>
                     !string.IsNullOrWhiteSpace(
                         x.SeoUrl))
                 .ToDictionary(
                     x => x.SeoUrl,
-                    x => x.Id,
                     SeoUrlKarsilastiricisi);
 
         var kategoriIdSozlugu =
@@ -170,10 +172,13 @@ public class ExcelUrunImportServisi : IExcelUrunImportServisi
         {
             cancellationToken.ThrowIfCancellationRequested();
 
+            var urunKodu =
+                satir.Dto.UrunKodu;
+
             if (!string.IsNullOrWhiteSpace(
-                    satir.Dto.UrunKodu) &&
-                mevcutUrunSozlugu.TryGetValue(
-                    satir.Dto.UrunKodu,
+                    urunKodu) &&
+                mevcutUrunKoduSozlugu.TryGetValue(
+                    urunKodu,
                     out var mevcutUrun))
             {
                 satir.Hatalar.Clear();
@@ -182,7 +187,7 @@ public class ExcelUrunImportServisi : IExcelUrunImportServisi
                     mevcutUrun;
 
                 if (tekrarEdenUrunKodlari.Contains(
-                        satir.Dto.UrunKodu))
+                        urunKodu))
                 {
                     satir.Hatalar.Add(
                         "Aynı ürün kodu Excel dosyasında birden fazla kez kullanılamaz.");
@@ -192,9 +197,9 @@ public class ExcelUrunImportServisi : IExcelUrunImportServisi
             }
 
             if (!string.IsNullOrWhiteSpace(
-                    satir.Dto.UrunKodu) &&
+                    urunKodu) &&
                 tekrarEdenUrunKodlari.Contains(
-                    satir.Dto.UrunKodu))
+                    urunKodu))
             {
                 satir.Hatalar.Add(
                     "Aynı ürün kodu Excel dosyasında birden fazla kez kullanılamaz.");
@@ -251,7 +256,29 @@ public class ExcelUrunImportServisi : IExcelUrunImportServisi
                 satir.HesaplananSeoUrl =
                     hesaplananSeoUrl;
 
-                if (mevcutSeoUrlSahipleri.ContainsKey(
+                /*
+                 * Ürün kodu yoksa mevcut ürünün
+                 * tespitinde SEO URL ikinci anahtar
+                 * olarak kullanılır.
+                 */
+                if (string.IsNullOrWhiteSpace(
+                        urunKodu) &&
+                    mevcutSeoUrlSozlugu.TryGetValue(
+                        hesaplananSeoUrl,
+                        out var seoIleMevcutUrun))
+                {
+                    satir.MevcutUrun =
+                        seoIleMevcutUrun;
+
+                    continue;
+                }
+
+                /*
+                 * Ürün kodu gönderilmiş fakat bu kod
+                 * mevcut ürünle eşleşmemişse, kullanılan
+                 * bir SEO URL yeni ürün için kullanılamaz.
+                 */
+                if (mevcutSeoUrlSozlugu.ContainsKey(
                         hesaplananSeoUrl))
                 {
                     satir.Hatalar.Add(
@@ -274,7 +301,8 @@ public class ExcelUrunImportServisi : IExcelUrunImportServisi
 
         var satirSonuclari =
             okunanSatirlar
-                .OrderBy(x => x.Dto.SatirNo)
+                .OrderBy(x =>
+                    x.Dto.SatirNo)
                 .Select(
                     SatirAnalizSonucunuOlustur)
                 .ToList();
@@ -427,8 +455,7 @@ public class ExcelUrunImportServisi : IExcelUrunImportServisi
                     }
 
                     var teknikDetayTanimlari =
-                        await _dbContext
-                            .UrunDetayTanimlari
+                        await _dbContext.UrunDetayTanimlari
                             .AsNoTracking()
                             .OrderBy(x => x.SiraNo)
                             .ThenBy(x => x.DetayAdi)
@@ -463,14 +490,17 @@ public class ExcelUrunImportServisi : IExcelUrunImportServisi
                     var eklenenUrunKodlari =
                         new List<string>();
 
+                    var eklenenUrunSayisi =
+                        0;
+
                     var eklenenTeknikDetaySayisi =
                         0;
 
-                    foreach (var satir in excelSatirlari
-                                 .OrderBy(x => x.Dto.SatirNo))
+                    foreach (var satir in
+                             excelSatirlari.OrderBy(
+                                 x => x.Dto.SatirNo))
                     {
-                        cancellationToken
-                            .ThrowIfCancellationRequested();
+                        cancellationToken.ThrowIfCancellationRequested();
 
                         if (!analizSatiriSozlugu.TryGetValue(
                                 satir.Dto.SatirNo,
@@ -581,8 +611,14 @@ public class ExcelUrunImportServisi : IExcelUrunImportServisi
                             },
                             cancellationToken);
 
-                        eklenenUrunKodlari.Add(
-                            satir.Dto.UrunKodu);
+                        eklenenUrunSayisi++;
+
+                        if (!string.IsNullOrWhiteSpace(
+                                satir.Dto.UrunKodu))
+                        {
+                            eklenenUrunKodlari.Add(
+                                satir.Dto.UrunKodu!);
+                        }
 
                         eklenenTeknikDetaySayisi +=
                             teknikDetaylar.Count;
@@ -597,7 +633,7 @@ public class ExcelUrunImportServisi : IExcelUrunImportServisi
                             analizSonucu.ToplamSatirSayisi,
 
                         EklenenUrunSayisi =
-                            eklenenUrunKodlari.Count,
+                            eklenenUrunSayisi,
 
                         MevcutUrunSayisi =
                             analizSonucu.MevcutUrunSayisi,
@@ -830,9 +866,9 @@ public class ExcelUrunImportServisi : IExcelUrunImportServisi
                                 satirNo,
 
                             UrunKodu =
-                                satir.Cell(1)
-                                    .GetString()
-                                    .Trim(),
+                                Temizle(
+                                    satir.Cell(1)
+                                        .GetString()),
 
                             UrunAdi =
                                 satir.Cell(2)
@@ -886,8 +922,7 @@ public class ExcelUrunImportServisi : IExcelUrunImportServisi
                 "Öne Çıkan",
                 okunanSatir,
                 deger =>
-                    okunanSatir.Dto
-                        .OneCikanMi =
+                    okunanSatir.Dto.OneCikanMi =
                         deger);
 
             SiraNoOku(
@@ -899,8 +934,7 @@ public class ExcelUrunImportServisi : IExcelUrunImportServisi
                 "Aktif",
                 okunanSatir,
                 deger =>
-                    okunanSatir.Dto
-                        .AktifMi =
+                    okunanSatir.Dto.AktifMi =
                         deger);
 
             TeknikDetaylariOku(
@@ -1160,13 +1194,9 @@ public class ExcelUrunImportServisi : IExcelUrunImportServisi
         var dto =
             satir.Dto;
 
-        if (string.IsNullOrWhiteSpace(
-                dto.UrunKodu))
-        {
-            satir.Hatalar.Add(
-                "Ürün kodu zorunludur.");
-        }
-        else if (dto.UrunKodu.Length > 100)
+        if (!string.IsNullOrWhiteSpace(
+                dto.UrunKodu) &&
+            dto.UrunKodu.Length > 100)
         {
             satir.Hatalar.Add(
                 "Ürün kodu en fazla 100 karakter olabilir.");
@@ -1249,7 +1279,7 @@ public class ExcelUrunImportServisi : IExcelUrunImportServisi
                 !string.IsNullOrWhiteSpace(
                     x.Dto.UrunKodu))
             .GroupBy(
-                x => x.Dto.UrunKodu,
+                x => x.Dto.UrunKodu!,
                 UrunKoduKarsilastiricisi)
             .Where(x =>
                 x.Count() > 1)
@@ -1305,7 +1335,8 @@ public class ExcelUrunImportServisi : IExcelUrunImportServisi
                 : mevcutUrunler.Max(
                     x => x.SiraNo);
 
-        foreach (var satir in satirlar
+        foreach (var satir in
+                 satirlar
                      .Where(x =>
                          x.MevcutUrun is null &&
                          x.Hatalar.Count == 0)
@@ -1770,8 +1801,7 @@ public class ExcelUrunImportServisi : IExcelUrunImportServisi
     {
         public int Id { get; set; }
 
-        public string UrunKodu { get; set; } =
-            string.Empty;
+        public string? UrunKodu { get; set; }
 
         public string SeoUrl { get; set; } =
             string.Empty;

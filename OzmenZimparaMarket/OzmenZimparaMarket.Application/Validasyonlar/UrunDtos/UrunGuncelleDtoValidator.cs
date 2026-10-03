@@ -19,8 +19,6 @@ public class UrunGuncelleDtoValidator : AbstractValidator<UrunGuncelleDto>
             .WithMessage("Ürün adı en fazla 200 karakter olabilir.");
 
         RuleFor(x => x.UrunKodu)
-            .NotEmpty()
-            .WithMessage("Ürün kodu zorunludur.")
             .MaximumLength(100)
             .WithMessage("Ürün kodu en fazla 100 karakter olabilir.");
 

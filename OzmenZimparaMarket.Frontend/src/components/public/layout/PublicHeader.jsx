@@ -5,42 +5,103 @@ import { NavLink, useLocation } from "react-router";
 import { usePublicSite } from "../../../contexts/PublicSiteContext";
 import { useTeklifSepeti } from "../../../contexts/TeklifSepetiContext";
 
+import { whatsappTeklifBaglantisiOlustur } from "../../../utils/whatsappTeklif";
+
 import HakkimizdaDropdown from "./HakkimizdaDropdown";
 import PublicMobileMenu from "./PublicMobileMenu";
+import TeklifSepetiPopup from "./TeklifSepetiPopup";
 
 function PublicHeader() {
   const location = useLocation();
 
   const { whatsappBaglantisi } = usePublicSite();
 
-  const { sepetKalemSayisi } = useTeklifSepeti();
+  const { sepetUrunleri, sepetKalemSayisi, urunKaldir, miktarDegistir } =
+    useTeklifSepeti();
 
   const [kurumsalMenuAcikMi, setKurumsalMenuAcikMi] = useState(false);
 
   const [mobilMenuAcikMi, setMobilMenuAcikMi] = useState(false);
 
+  const [sepetPopupAcikMi, setSepetPopupAcikMi] = useState(false);
+
   const dropdownRef = useRef(null);
+  const sepetPopupRef = useRef(null);
+
+  const aktifWhatsappBaglantisi = whatsappTeklifBaglantisiOlustur(
+    whatsappBaglantisi,
+    sepetUrunleri,
+  );
 
   useEffect(() => {
     function disTiklama(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setKurumsalMenuAcikMi(false);
       }
+
+      if (
+        sepetPopupRef.current &&
+        !sepetPopupRef.current.contains(event.target)
+      ) {
+        setSepetPopupAcikMi(false);
+      }
+    }
+
+    function escapeKontrolu(event) {
+      if (event.key !== "Escape") {
+        return;
+      }
+
+      setKurumsalMenuAcikMi(false);
+      setSepetPopupAcikMi(false);
+      setMobilMenuAcikMi(false);
     }
 
     document.addEventListener("mousedown", disTiklama);
 
+    document.addEventListener("keydown", escapeKontrolu);
+
     return () => {
       document.removeEventListener("mousedown", disTiklama);
+
+      document.removeEventListener("keydown", escapeKontrolu);
     };
   }, []);
 
   function menuleriKapat() {
     setKurumsalMenuAcikMi(false);
     setMobilMenuAcikMi(false);
+    setSepetPopupAcikMi(false);
   }
 
-  const kurumsalAktifMi = location.pathname === "/hakkimizda";
+  function kurumsalMenuyuDegistir() {
+    setSepetPopupAcikMi(false);
+
+    setKurumsalMenuAcikMi((mevcut) => !mevcut);
+  }
+
+  function sepetPopupDegistir() {
+    setKurumsalMenuAcikMi(false);
+    setMobilMenuAcikMi(false);
+
+    setSepetPopupAcikMi((mevcut) => !mevcut);
+  }
+
+  function mobilMenuyuDegistir() {
+    setKurumsalMenuAcikMi(false);
+    setSepetPopupAcikMi(false);
+
+    setMobilMenuAcikMi((mevcut) => !mevcut);
+  }
+
+  const kurumsalYollari = [
+    "/hakkimizda",
+    "/vizyon-misyon-strateji",
+    "/kalite-politikasi",
+    "/kvkk",
+  ];
+
+  const kurumsalAktifMi = kurumsalYollari.includes(location.pathname);
 
   return (
     <header
@@ -49,9 +110,9 @@ function PublicHeader() {
         top-0
         z-50
         border-b
-        border-white/[0.07]
-        bg-[#070912]/95
-        shadow-[0_8px_30px_rgba(0,0,0,0.18)]
+        border-white/[0.05]
+        bg-[#050711]/90
+        shadow-[0_8px_30px_rgba(0,0,0,0.10)]
         backdrop-blur-xl
       "
     >
@@ -68,6 +129,7 @@ function PublicHeader() {
           lg:px-8
         "
       >
+        {/* Logo */}
         <NavLink
           to="/"
           onClick={menuleriKapat}
@@ -76,7 +138,7 @@ function PublicHeader() {
             shrink-0
             items-center
           "
-          aria-label="Ana sayfa"
+          aria-label="Özmen Zımpara Market ana sayfa"
         >
           <img
             src="/logo/header2.png"
@@ -91,6 +153,7 @@ function PublicHeader() {
           />
         </NavLink>
 
+        {/* Desktop menü */}
         <nav
           className="
             ml-10
@@ -113,7 +176,7 @@ function PublicHeader() {
           <div ref={dropdownRef} className="relative">
             <button
               type="button"
-              onClick={() => setKurumsalMenuAcikMi((mevcut) => !mevcut)}
+              onClick={kurumsalMenuyuDegistir}
               className={`
                 relative
                 inline-flex
@@ -124,6 +187,7 @@ function PublicHeader() {
                 text-[13px]
                 font-bold
                 transition-colors
+                duration-200
 
                 ${
                   kurumsalAktifMi
@@ -131,8 +195,9 @@ function PublicHeader() {
                     : "text-white/60 hover:text-white"
                 }
               `}
+              aria-expanded={kurumsalMenuAcikMi}
             >
-              Hakkımızda
+              Kurumsal
               <ChevronIcon open={kurumsalMenuAcikMi} />
               {kurumsalAktifMi && (
                 <span
@@ -160,6 +225,7 @@ function PublicHeader() {
           </DesktopNavLink>
         </nav>
 
+        {/* Sağ taraf */}
         <div
           className="
             ml-auto
@@ -168,58 +234,88 @@ function PublicHeader() {
             gap-2
           "
         >
+          {/* Teklif Sepeti */}
           <div
+            ref={sepetPopupRef}
             className="
+              relative
               hidden
-              items-center
-              gap-2
-              rounded-xl
-              border
-              border-white/[0.08]
-              bg-white/[0.025]
-              px-3.5
-              py-2.5
-              text-white/75
 
-              sm:flex
+              sm:block
             "
           >
-            <CartIcon />
-
-            <span
-              className="
-                hidden
-                text-xs
-                font-bold
-
-                xl:inline
-              "
-            >
-              Teklif Sepeti
-            </span>
-
-            <span
-              className="
+            <button
+              type="button"
+              onClick={sepetPopupDegistir}
+              className={`
                 flex
-                h-5
-                min-w-5
                 items-center
-                justify-center
-                rounded-full
-                bg-purple-500
-                px-1.5
-                text-[10px]
-                font-extrabold
-                text-white
-              "
+                gap-2
+                rounded-xl
+                border
+                px-3.5
+                py-2.5
+                transition-all
+                duration-200
+
+                ${
+                  sepetPopupAcikMi
+                    ? "border-purple-400/25 bg-white/[0.07] text-white"
+                    : "border-white/[0.08] bg-white/[0.025] text-white/75 hover:border-white/[0.13] hover:bg-white/[0.045] hover:text-white"
+                }
+              `}
+              aria-label="Teklif sepetini aç"
+              aria-expanded={sepetPopupAcikMi}
             >
-              {sepetKalemSayisi}
-            </span>
+              <CartIcon />
+
+              <span
+                className="
+                  hidden
+                  text-xs
+                  font-bold
+
+                  xl:inline
+                "
+              >
+                Teklif Sepeti
+              </span>
+
+              <span
+                className="
+                  flex
+                  h-5
+                  min-w-5
+                  items-center
+                  justify-center
+                  rounded-full
+                  bg-gradient-to-r
+                  from-blue-500
+                  to-purple-500
+                  px-1.5
+                  text-[10px]
+                  font-extrabold
+                  text-white
+                "
+              >
+                {sepetKalemSayisi}
+              </span>
+            </button>
+            <TeklifSepetiPopup
+              open={sepetPopupAcikMi}
+              sepetUrunleri={sepetUrunleri}
+              sepetKalemSayisi={sepetKalemSayisi}
+              whatsappBaglantisi={aktifWhatsappBaglantisi}
+              onUrunKaldir={urunKaldir}
+              onMiktarDegistir={miktarDegistir}
+              onClose={() => setSepetPopupAcikMi(false)}
+            />
           </div>
 
-          {whatsappBaglantisi && (
+          {/* WhatsApp */}
+          {aktifWhatsappBaglantisi && (
             <a
-              href={whatsappBaglantisi}
+              href={aktifWhatsappBaglantisi}
               target="_blank"
               rel="noreferrer"
               className="
@@ -234,23 +330,29 @@ function PublicHeader() {
                 text-xs
                 font-extrabold
                 text-white
-                shadow-[0_8px_24px_rgba(37,211,102,0.16)]
+                shadow-[0_8px_24px_rgba(37,211,102,0.14)]
                 transition-all
+                duration-200
 
                 hover:-translate-y-0.5
                 hover:bg-[#20bd5a]
+                hover:shadow-[0_10px_28px_rgba(37,211,102,0.20)]
 
                 xl:inline-flex
               "
             >
               <WhatsAppIcon />
-              WhatsApp'tan İletişime Geç
+
+              {sepetKalemSayisi > 0
+                ? "WhatsApp'tan Teklif Al"
+                : "WhatsApp'tan İletişime Geç"}
             </a>
           )}
 
+          {/* Mobil menü */}
           <button
             type="button"
-            onClick={() => setMobilMenuAcikMi((mevcut) => !mevcut)}
+            onClick={mobilMenuyuDegistir}
             className="
               flex
               h-10
@@ -262,8 +364,9 @@ function PublicHeader() {
               border-white/[0.08]
               bg-white/[0.03]
               text-white/80
-              transition
+              transition-colors
 
+              hover:border-white/[0.13]
               hover:bg-white/[0.07]
               hover:text-white
 
@@ -280,7 +383,7 @@ function PublicHeader() {
       <PublicMobileMenu
         open={mobilMenuAcikMi}
         sepetKalemSayisi={sepetKalemSayisi}
-        whatsappBaglantisi={whatsappBaglantisi}
+        whatsappBaglantisi={aktifWhatsappBaglantisi}
         onClose={menuleriKapat}
       />
     </header>
@@ -302,6 +405,7 @@ function DesktopNavLink({ to, end = false, onClick, children }) {
         text-[13px]
         font-bold
         transition-colors
+        duration-200
 
         ${isActive ? "text-white" : "text-white/60 hover:text-white"}
       `}
@@ -340,6 +444,7 @@ function ChevronIcon({ open }) {
         h-3.5
         w-3.5
         transition-transform
+        duration-200
 
         ${open ? "rotate-180" : ""}
       `}

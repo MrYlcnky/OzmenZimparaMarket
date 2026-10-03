@@ -8,23 +8,19 @@ const kurumsalLinkler = [
   },
   {
     baslik: "Vizyonumuz",
-    aciklama: "Geleceğe yönelik hedeflerimizi inceleyin.",
-    yol: "/hakkimizda#vizyonumuz",
-  },
-  {
-    baslik: "Misyonumuz",
-    aciklama: "Müşterilerimize sunduğumuz değerleri keşfedin.",
-    yol: "/hakkimizda#misyonumuz",
-  },
-  {
-    baslik: "Stratejimiz",
-    aciklama: "Sürdürülebilir büyüme yaklaşımımızı inceleyin.",
-    yol: "/hakkimizda#stratejimiz",
+    aciklama: "Vizyonumuzu, misyonumuzu ve stratejimizi inceleyin.",
+    yol: "/vizyon-misyon-strateji",
   },
   {
     baslik: "Kalite Politikamız",
     aciklama: "Kalite ve hizmet standartlarımızı görün.",
-    yol: "/hakkimizda#kalite-politikamiz",
+    yol: "/kalite-politikasi",
+  },
+  {
+    baslik: "KVKK",
+    aciklama:
+      "Kişisel verilerin korunmasına ilişkin bilgilendirmeyi inceleyin.",
+    yol: "/kvkk",
   },
 ];
 
@@ -40,7 +36,7 @@ function HakkimizdaDropdown({ open, onClose }) {
         left-1/2
         top-[calc(100%+18px)]
         z-50
-        w-[390px]
+        w-[300px]
         -translate-x-1/2
       "
     >
@@ -56,40 +52,7 @@ function HakkimizdaDropdown({ open, onClose }) {
           backdrop-blur-xl
         "
       >
-        <div
-          className="
-            border-b
-            border-white/[0.07]
-            px-4
-            pb-3
-            pt-2
-          "
-        >
-          <p
-            className="
-              text-[10px]
-              font-extrabold
-              uppercase
-              tracking-[0.18em]
-              text-purple-300
-            "
-          >
-            Kurumsal
-          </p>
-
-          <p
-            className="
-              mt-1
-              text-xs
-              leading-5
-              text-white/45
-            "
-          >
-            Özmen Zımpara Market'in kurumsal yaklaşımını keşfedin.
-          </p>
-        </div>
-
-        <div className="mt-1 space-y-1">
+        <div className="space-y-1">
           {kurumsalLinkler.map((link) => (
             <Link
               key={link.yol}
@@ -100,7 +63,7 @@ function HakkimizdaDropdown({ open, onClose }) {
                 block
                 rounded-xl
                 px-4
-                py-3
+                py-3.5
                 transition-all
 
                 hover:bg-white/[0.06]

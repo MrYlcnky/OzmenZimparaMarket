@@ -275,7 +275,6 @@ namespace OzmenZimparaMarket.Infrastructure.Veritabani.Migrations
                         .HasColumnType("varchar(200)");
 
                     b.Property<string>("UrunKodu")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 

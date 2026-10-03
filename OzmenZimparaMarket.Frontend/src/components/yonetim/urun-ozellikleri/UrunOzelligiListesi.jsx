@@ -348,7 +348,8 @@ function UrunOzelligiListesi({
 
               <input
                 id="urun-ozelligi-arama"
-                type="search"
+                type="text"
+                inputMode="search"
                 value={aramaMetni}
                 onChange={(event) => setAramaMetni(event.target.value)}
                 placeholder="Özellik adına göre ara..."

@@ -17,8 +17,8 @@ function PublicFooter() {
     <footer
       className="
         border-t
-        border-white/[0.07]
-        bg-[#060810]
+        border-white/[0.05]
+        bg-[#050711]
         text-white
       "
     >
@@ -44,11 +44,19 @@ function PublicFooter() {
           "
         >
           <div>
-            <Link to="/" className="inline-flex">
+            <Link
+              to="/"
+              className="inline-flex"
+              aria-label="Özmen Zımpara Market ana sayfa"
+            >
               <img
                 src="/logo/header2.png"
                 alt="Özmen Zımpara Market"
-                className="h-14 w-auto"
+                className="
+                  h-14
+                  w-auto
+                  object-contain
+                "
               />
             </Link>
 
@@ -83,9 +91,13 @@ function PublicFooter() {
                   text-xs
                   font-extrabold
                   text-white
-                  transition
+                  shadow-[0_8px_24px_rgba(37,211,102,0.14)]
+                  transition-all
+                  duration-200
 
+                  hover:-translate-y-0.5
                   hover:bg-[#20bd5a]
+                  hover:shadow-[0_10px_28px_rgba(37,211,102,0.20)]
                 "
               >
                 <WhatsAppIcon />
@@ -105,15 +117,9 @@ function PublicFooter() {
           <FooterKolonu baslik="Kurumsal">
             <FooterLink to="/hakkimizda">Hakkımızda</FooterLink>
 
-            <FooterLink to="/hakkimizda#vizyonumuz">Vizyonumuz</FooterLink>
+            <FooterLink to="/vizyon-misyon-strateji">Vizyonumuz</FooterLink>
 
-            <FooterLink to="/hakkimizda#misyonumuz">Misyonumuz</FooterLink>
-
-            <FooterLink to="/hakkimizda#stratejimiz">Stratejimiz</FooterLink>
-
-            <FooterLink to="/hakkimizda#kalite-politikamiz">
-              Kalite Politikamız
-            </FooterLink>
+            <FooterLink to="/kalite-politikasi">Kalite Politikamız</FooterLink>
           </FooterKolonu>
 
           <FooterKolonu baslik="İletişim">
@@ -169,7 +175,7 @@ function PublicFooter() {
             flex-col
             gap-4
             border-t
-            border-white/[0.07]
+            border-white/[0.05]
             pt-6
             text-xs
             text-white/35
@@ -185,10 +191,11 @@ function PublicFooter() {
           </p>
 
           <Link
-            to="/hakkimizda#kvkk"
+            to="/kvkk"
             className="
               font-semibold
               transition-colors
+              duration-200
 
               hover:text-purple-300
             "
@@ -240,6 +247,7 @@ function FooterLink({ to, children }) {
         font-medium
         text-white/45
         transition-colors
+        duration-200
 
         hover:text-purple-300
       "
@@ -278,6 +286,7 @@ function IletisimLinki({ href, baslik, deger }) {
           font-semibold
           text-white/55
           transition-colors
+          duration-200
 
           group-hover:text-purple-300
         "

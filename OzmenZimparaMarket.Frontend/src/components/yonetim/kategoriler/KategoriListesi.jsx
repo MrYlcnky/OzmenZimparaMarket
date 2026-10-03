@@ -3,11 +3,13 @@ import { useMemo, useState } from "react";
 import { dosyaUrlOlustur } from "../../../api/servisler/dosyaServisi";
 
 import DataTable from "../../ui/DataTable";
+import GorselOnizlemeModal from "../../ui/GorselOnizlemeModal";
 import Select from "../../ui/Select";
 
 function metniNormalizeEt(deger) {
   return String(deger ?? "")
     .trim()
+
     .toLocaleLowerCase("tr-TR");
 }
 
@@ -73,6 +75,7 @@ function kategorileriSirala(kategoriler) {
   kategoriler.forEach((kategori) => {
     kategoriMap.set(kategori.id, {
       ...kategori,
+
       altKategoriler: [],
     });
   });
@@ -84,7 +87,9 @@ function kategorileriSirala(kategoriler) {
 
     if (kategori.ustKategoriId && kategoriMap.has(kategori.ustKategoriId)) {
       kategoriMap
+
         .get(kategori.ustKategoriId)
+
         .altKategoriler.push(mevcutKategori);
 
       return;
@@ -115,6 +120,7 @@ function kategorileriSirala(kategoriler) {
     liste.forEach((kategori) => {
       sonuc.push({
         ...kategori,
+
         seviye,
       });
 
@@ -131,13 +137,17 @@ function KategoriListesi({
   kategoriler,
 
   onDuzenle,
+
   onDurumDegistir,
+
   onSil,
 
   islemdekiKategoriId,
 
   seciliKategoriIdleri = [],
+
   onSecimDegistir,
+
   onTopluSil,
 
   topluSilmeDevamEdiyor = false,
@@ -148,8 +158,11 @@ function KategoriListesi({
 
   const [turFiltresi, setTurFiltresi] = useState("tumu");
 
+  const [gorselOnizleme, setGorselOnizleme] = useState(null);
+
   const kategoriMap = useMemo(
     () => new Map(kategoriler.map((kategori) => [kategori.id, kategori])),
+
     [kategoriler],
   );
 
@@ -157,13 +170,13 @@ function KategoriListesi({
     const siraliKategoriler = kategorileriSirala(kategoriler);
 
     let anaKategoriZebraIndex = 0;
+
     let altKategoriZebraIndex = 0;
 
     return siraliKategoriler.map((kategori) => {
       const seviye = kategoriSeviyesiBul(kategori, kategoriMap);
 
-      const zebraIndex =
-        seviye === 0 ? anaKategoriZebraIndex++ : altKategoriZebraIndex++;
+      const zebraIndex = seviye === 0 ? anaKategoriZebraIndex++ : altKategoriZebraIndex++;
 
       return {
         ...kategori,
@@ -171,6 +184,7 @@ function KategoriListesi({
         kategoriYolu: kategoriYoluOlustur(kategori, kategoriMap),
 
         seviye,
+
         zebraIndex,
       };
     });
@@ -202,14 +216,22 @@ function KategoriListesi({
 
       const aranabilirMetin = [
         kategori.id,
+
         kategori.kategoriAdi,
+
         kategori.kategoriYolu,
+
         kategori.seoUrl,
+
         kategori.seoBasligi,
+
         kategori.seoAciklamasi,
+
         kategori.aciklama,
       ]
+
         .map(metniNormalizeEt)
+
         .join(" ");
 
       return aranabilirMetin.includes(arama);
@@ -220,37 +242,43 @@ function KategoriListesi({
     () => [
       {
         key: "kategori",
+
         header: "Kategori",
+
         width: "38%",
 
-        render: (kategori) => <KategoriBilgisi kategori={kategori} />,
+        render: (kategori) => <KategoriBilgisi kategori={kategori} onGorselAc={setGorselOnizleme} />,
       },
 
       {
         key: "tur",
+
         header: "Tür",
+
         width: "13%",
 
         render: (kategori) =>
-          kategori.ustKategoriId ? (
-            <Rozet tur="purple">Alt Kategori</Rozet>
-          ) : (
-            <Rozet tur="blue">Ana Kategori</Rozet>
-          ),
+          kategori.ustKategoriId ? <Rozet tur="purple">Alt Kategori</Rozet> : <Rozet tur="blue">Ana Kategori</Rozet>,
       },
 
       {
         key: "seoUrl",
+
         header: "SEO",
+
         width: "18%",
 
         render: (kategori) => (
           <div className="min-w-0">
             <p
               className="
+
                 truncate
+
                 font-semibold
+
                 text-text-primary
+
               "
               title={kategori.seoUrl}
             >
@@ -260,10 +288,15 @@ function KategoriListesi({
             {kategori.anaSayfadaGosterilsinMi && (
               <p
                 className="
+
                   mt-1
+
                   text-[11px]
+
                   font-bold
+
                   text-warning
+
                 "
               >
                 Ana sayfada
@@ -275,7 +308,9 @@ function KategoriListesi({
 
       {
         key: "siraNo",
+
         header: "Sıra",
+
         width: "8%",
 
         cellClassName: "whitespace-nowrap",
@@ -283,8 +318,11 @@ function KategoriListesi({
         render: (kategori) => (
           <span
             className="
+
               font-bold
+
               text-text-primary
+
             "
           >
             {kategori.siraNo}
@@ -294,7 +332,9 @@ function KategoriListesi({
 
       {
         key: "durum",
+
         header: "Durum",
+
         width: "10%",
 
         render: (kategori) => {
@@ -306,44 +346,70 @@ function KategoriListesi({
               disabled={islemde || topluSilmeDevamEdiyor}
               onClick={() => onDurumDegistir(kategori)}
               className={`
+
                 inline-flex
+
                 h-9
+
                 items-center
+
                 gap-2
+
                 rounded-ui
+
                 border
+
                 px-3
+
                 text-xs
+
                 font-bold
+
                 transition-colors
 
                 disabled:cursor-not-allowed
+
                 disabled:opacity-50
 
                 ${
                   kategori.aktifMi
                     ? `
+
                       border-success/20
+
                       bg-success/[0.06]
+
                       text-success
+
                       hover:bg-success/10
+
                     `
                     : `
+
                       border-border
+
                       bg-surface-soft
+
                       text-text-muted
+
                       hover:border-brand-blue/30
+
                       hover:text-brand-blue
+
                     `
                 }
+
               `}
             >
               <span
                 className={`
+
                   h-2 w-2
+
                   rounded-full
 
                   ${kategori.aktifMi ? "bg-success" : "bg-text-muted"}
+
                 `}
               />
 
@@ -355,7 +421,9 @@ function KategoriListesi({
 
       {
         key: "islemler",
+
         header: "İşlemler",
+
         width: "13%",
 
         headerClassName: "text-right",
@@ -370,10 +438,15 @@ function KategoriListesi({
           return (
             <div
               className="
+
                 flex
+
                 items-center
+
                 justify-end
+
                 gap-2
+
               "
             >
               <button
@@ -381,26 +454,43 @@ function KategoriListesi({
                 disabled={devreDisi}
                 onClick={() => onDuzenle(kategori.id)}
                 className="
+
                   inline-flex
+
                   h-9
+
                   items-center
+
                   justify-center
+
                   rounded-ui
+
                   border
+
                   border-border
+
                   bg-white
+
                   px-3
+
                   text-xs
+
                   font-bold
+
                   text-text-primary
+
                   transition-colors
 
                   hover:border-brand-blue/30
+
                   hover:bg-brand-blue/[0.04]
+
                   hover:text-brand-blue
 
                   disabled:cursor-not-allowed
+
                   disabled:opacity-50
+
                 "
               >
                 Düzenle
@@ -411,25 +501,41 @@ function KategoriListesi({
                 disabled={devreDisi}
                 onClick={() => onSil(kategori)}
                 className="
+
                   inline-flex
+
                   h-9
+
                   items-center
+
                   justify-center
+
                   rounded-ui
+
                   border
+
                   border-danger/15
+
                   bg-danger/[0.04]
+
                   px-3
+
                   text-xs
+
                   font-bold
+
                   text-danger
+
                   transition-colors
 
                   hover:border-danger/30
+
                   hover:bg-danger/10
 
                   disabled:cursor-not-allowed
+
                   disabled:opacity-50
+
                 "
               >
                 Sil
@@ -439,13 +545,8 @@ function KategoriListesi({
         },
       },
     ],
-    [
-      islemdekiKategoriId,
-      topluSilmeDevamEdiyor,
-      onDuzenle,
-      onDurumDegistir,
-      onSil,
-    ],
+
+    [islemdekiKategoriId, topluSilmeDevamEdiyor, onDuzenle, onDurumDegistir, onSil],
   );
 
   function filtreleriTemizle() {
@@ -460,160 +561,222 @@ function KategoriListesi({
     if (kategori.seviye === 0) {
       return ciftZebra
         ? `
+
           bg-white
+
           hover:bg-slate-50
+
         `
         : `
+
           bg-slate-50/80
+
           hover:bg-slate-100/80
+
         `;
     }
 
     return ciftZebra
       ? `
+
         bg-brand-blue/[0.035]
+
         hover:bg-brand-blue/[0.075]
+
       `
       : `
+
         bg-brand-purple/[0.035]
+
         hover:bg-brand-purple/[0.07]
+
       `;
   }
 
   return (
-    <DataTable
-      data={filtrelenmisKategoriler}
-      columns={columns}
-      getRowId={(kategori) => kategori.id}
-      rowClassName={kategoriSatirSinifi}
-      selectable
-      selectedRowIds={seciliKategoriIdleri}
-      onSelectionChange={onSecimDegistir}
-      isRowSelectable={() => !topluSilmeDevamEdiyor}
-      bulkActions={({ selectedCount }) => (
-        <button
-          type="button"
-          disabled={selectedCount === 0 || topluSilmeDevamEdiyor}
-          onClick={onTopluSil}
-          className="
-            inline-flex
-            h-9
-            items-center
-            justify-center
-            gap-2
-            rounded-ui
-            border
-            border-danger/20
-            bg-danger/[0.06]
-            px-4
-            text-xs
-            font-bold
-            text-danger
-            transition-all
+    <>
+      <DataTable
+        data={filtrelenmisKategoriler}
+        columns={columns}
+        getRowId={(kategori) => kategori.id}
+        rowClassName={kategoriSatirSinifi}
+        selectable
+        selectedRowIds={seciliKategoriIdleri}
+        onSelectionChange={onSecimDegistir}
+        isRowSelectable={() => !topluSilmeDevamEdiyor}
+        bulkActions={({ selectedCount }) => (
+          <button
+            type="button"
+            disabled={selectedCount === 0 || topluSilmeDevamEdiyor}
+            onClick={onTopluSil}
+            className="
 
-            hover:border-danger/35
-            hover:bg-danger/10
+              inline-flex
 
-            disabled:cursor-not-allowed
-            disabled:opacity-50
-          "
-        >
-          {topluSilmeDevamEdiyor ? (
-            <>
-              <span
-                className="
-                  h-3.5 w-3.5
-                  animate-spin
-                  rounded-full
-                  border-2
-                  border-danger/20
-                  border-t-danger
-                "
+              h-9
+
+              items-center
+
+              justify-center
+
+              gap-2
+
+              rounded-ui
+
+              border
+
+              border-danger/20
+
+              bg-danger/[0.06]
+
+              px-4
+
+              text-xs
+
+              font-bold
+
+              text-danger
+
+              transition-all
+
+              hover:border-danger/35
+
+              hover:bg-danger/10
+
+              disabled:cursor-not-allowed
+
+              disabled:opacity-50
+
+            "
+          >
+            {topluSilmeDevamEdiyor ? (
+              <>
+                <span
+                  className="
+
+                    h-3.5 w-3.5
+
+                    animate-spin
+
+                    rounded-full
+
+                    border-2
+
+                    border-danger/20
+
+                    border-t-danger
+
+                  "
+                />
+                Siliniyor...
+              </>
+            ) : (
+              <>
+                <TrashIcon />
+                {selectedCount} Kaydı Sil
+              </>
+            )}
+          </button>
+        )}
+        searchValue={aramaMetni}
+        onSearchChange={setAramaMetni}
+        searchPlaceholder="Kategori, SEO veya ID ara..."
+        pageResetKey={`${durumFiltresi}-${turFiltresi}`}
+        hasActiveFilters={durumFiltresi !== "tumu" || turFiltresi !== "tumu"}
+        onClearFilters={filtreleriTemizle}
+        defaultPageSize={10}
+        pageSizeOptions={[10, 20, 50]}
+        emptyTitle="Henüz kategori bulunmuyor"
+        emptyDescription="İlk kategorinizi oluşturmak için Yeni Kategori butonunu kullanabilirsiniz."
+        noResultTitle="Kategori bulunamadı"
+        noResultDescription="Arama veya filtre kriterlerinize uygun kategori bulunamadı."
+        tableMinWidth="1110px"
+        loading={topluSilmeDevamEdiyor}
+        toolbarRight={
+          <>
+            <div
+              className="
+
+                w-full
+
+                sm:w-[170px]
+
+              "
+            >
+              <Select
+                value={durumFiltresi}
+                options={[
+                  {
+                    value: "tumu",
+
+                    label: "Tüm Durumlar",
+                  },
+
+                  {
+                    value: "aktif",
+
+                    label: "Aktif",
+                  },
+
+                  {
+                    value: "pasif",
+
+                    label: "Pasif",
+                  },
+                ]}
+                onValueChange={setDurumFiltresi}
               />
-              Siliniyor...
-            </>
-          ) : (
-            <>
-              <TrashIcon />
-              {selectedCount} Kaydı Sil
-            </>
-          )}
-        </button>
-      )}
-      searchValue={aramaMetni}
-      onSearchChange={setAramaMetni}
-      searchPlaceholder="Kategori, SEO veya ID ara..."
-      pageResetKey={`${durumFiltresi}-${turFiltresi}`}
-      hasActiveFilters={durumFiltresi !== "tumu" || turFiltresi !== "tumu"}
-      onClearFilters={filtreleriTemizle}
-      defaultPageSize={10}
-      pageSizeOptions={[10, 20, 50]}
-      emptyTitle="Henüz kategori bulunmuyor"
-      emptyDescription="İlk kategorinizi oluşturmak için Yeni Kategori butonunu kullanabilirsiniz."
-      noResultTitle="Kategori bulunamadı"
-      noResultDescription="Arama veya filtre kriterlerinize uygun kategori bulunamadı."
-      tableMinWidth="1110px"
-      loading={topluSilmeDevamEdiyor}
-      toolbarRight={
-        <>
-          <div
-            className="
-              w-full
-              sm:w-[170px]
-            "
-          >
-            <Select
-              value={durumFiltresi}
-              options={[
-                {
-                  value: "tumu",
-                  label: "Tüm Durumlar",
-                },
-                {
-                  value: "aktif",
-                  label: "Aktif",
-                },
-                {
-                  value: "pasif",
-                  label: "Pasif",
-                },
-              ]}
-              onValueChange={setDurumFiltresi}
-            />
-          </div>
+            </div>
 
-          <div
-            className="
-              w-full
-              sm:w-[190px]
-            "
-          >
-            <Select
-              value={turFiltresi}
-              options={[
-                {
-                  value: "tumu",
-                  label: "Tüm Kategoriler",
-                },
-                {
-                  value: "ana",
-                  label: "Ana Kategoriler",
-                },
-                {
-                  value: "alt",
-                  label: "Alt Kategoriler",
-                },
-              ]}
-              onValueChange={setTurFiltresi}
-            />
-          </div>
-        </>
-      }
-    />
+            <div
+              className="
+
+                w-full
+
+                sm:w-[190px]
+
+              "
+            >
+              <Select
+                value={turFiltresi}
+                options={[
+                  {
+                    value: "tumu",
+
+                    label: "Tüm Kategoriler",
+                  },
+
+                  {
+                    value: "ana",
+
+                    label: "Ana Kategoriler",
+                  },
+
+                  {
+                    value: "alt",
+
+                    label: "Alt Kategoriler",
+                  },
+                ]}
+                onValueChange={setTurFiltresi}
+              />
+            </div>
+          </>
+        }
+      />
+
+      <GorselOnizlemeModal
+        open={Boolean(gorselOnizleme)}
+        src={gorselOnizleme?.src}
+        alt={gorselOnizleme?.alt}
+        baslik={gorselOnizleme?.baslik}
+        onClose={() => setGorselOnizleme(null)}
+      />
+    </>
   );
 }
 
-function KategoriBilgisi({ kategori }) {
+function KategoriBilgisi({ kategori, onGorselAc }) {
   const seviye = kategori.seviye ?? 0;
 
   const girinti = Math.min(seviye, 4) * 28;
@@ -621,34 +784,50 @@ function KategoriBilgisi({ kategori }) {
   return (
     <div
       className="
+
         flex
+
         min-w-[260px]
+
         items-center
+
         gap-3.5
+
       "
       style={{
         paddingLeft: `${girinti}px`,
       }}
     >
-      <KategoriGorseli kategori={kategori} />
+      <KategoriGorseli kategori={kategori} onGorselAc={onGorselAc} />
 
       <div className="min-w-0">
         <div
           className="
+
             flex
+
             items-center
+
             gap-2
+
           "
         >
           {seviye > 0 && (
             <span
               className="
+
                 flex
+
                 h-5 w-5
+
                 shrink-0
+
                 items-center
+
                 justify-center
+
                 text-text-muted/50
+
               "
               aria-hidden="true"
             >
@@ -658,10 +837,15 @@ function KategoriBilgisi({ kategori }) {
 
           <p
             className="
+
               truncate
+
               text-sm
+
               font-extrabold
+
               text-text-primary
+
             "
           >
             {kategori.kategoriAdi}
@@ -670,10 +854,15 @@ function KategoriBilgisi({ kategori }) {
 
         <p
           className="
+
             mt-1
+
             truncate
+
             text-xs
+
             text-text-muted
+
           "
           title={kategori.kategoriYolu}
         >
@@ -682,10 +871,15 @@ function KategoriBilgisi({ kategori }) {
 
         <p
           className="
+
             mt-1
+
             text-[10px]
+
             font-semibold
+
             text-text-muted/80
+
           "
         >
           ID: {kategori.id}
@@ -695,7 +889,7 @@ function KategoriBilgisi({ kategori }) {
   );
 }
 
-function KategoriGorseli({ kategori }) {
+function KategoriGorseli({ kategori, onGorselAc }) {
   if (!kategori.gorselYolu) {
     return (
       <div
@@ -717,27 +911,64 @@ function KategoriGorseli({ kategori }) {
     );
   }
 
+  const gorselUrl = dosyaUrlOlustur(kategori.gorselYolu);
+
+  function gorseliAc() {
+    onGorselAc?.({
+      src: gorselUrl,
+      alt: kategori.kategoriAdi,
+      baslik: kategori.kategoriAdi,
+    });
+  }
+
   return (
-    <div
+    <button
+      type="button"
+      onClick={gorseliAc}
+      title="Görseli büyüt"
+      aria-label={`${kategori.kategoriAdi} görselini büyüt`}
       className="
-        h-12 w-12
+        group/gorsel
+        relative
+        flex
+        h-12
+        w-12
         shrink-0
+        cursor-zoom-in
+        items-center
+        justify-center
         overflow-hidden
         rounded-ui
         border
         border-border
-        bg-surface-soft
+        bg-white
+        transition-all
+
+        hover:border-brand-blue/40
+        hover:shadow-[0_5px_15px_rgba(37,99,235,0.14)]
+
+        focus:outline-none
+        focus-visible:ring-4
+        focus-visible:ring-brand-blue/15
       "
     >
       <img
-        src={dosyaUrlOlustur(kategori.gorselYolu)}
+        src={gorselUrl}
         alt={kategori.kategoriAdi}
+        loading="lazy"
         className="
-          h-full w-full
-          object-cover
+          h-full
+          w-full
+          object-contain
+          object-center
+          p-0.5
+          transition-transform
+          duration-300
+
+          group-hover/gorsel:scale-[1.08]
         "
       />
-    </div>
+    </button>
   );
 }
 
@@ -751,15 +982,23 @@ function Rozet({ tur, children }) {
   return (
     <span
       className={`
+
         inline-flex
+
         whitespace-nowrap
+
         rounded-full
+
         px-2.5
+
         py-1
+
         text-[10px]
+
         font-bold
 
         ${stiller[tur]}
+
       `}
     >
       {children}
@@ -769,19 +1008,8 @@ function Rozet({ tur, children }) {
 
 function TrashIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      className="h-4 w-4"
-      aria-hidden="true"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M4 7h16M9 7V4h6v3m3 0-1 13H7L6 7"
-      />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M9 7V4h6v3m3 0-1 13H7L6 7" />
 
       <path strokeLinecap="round" d="M10 11v5M14 11v5" />
     </svg>
@@ -790,14 +1018,7 @@ function TrashIcon() {
 
 function ImageIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      className="h-5 w-5"
-      aria-hidden="true"
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5" aria-hidden="true">
       <rect x="3" y="4" width="18" height="16" rx="2" />
 
       <circle cx="9" cy="10" r="2" />
@@ -805,9 +1026,13 @@ function ImageIcon() {
       <path
         d="
           m4 17
+
           5-5
+
           4 4
+
           2-2
+          
           5 4
         "
       />
@@ -817,19 +1042,8 @@ function ImageIcon() {
 
 function HierarchyIcon() {
   return (
-    <svg
-      viewBox="0 0 20 20"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      className="h-4 w-4"
-      aria-hidden="true"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M4 3v6a4 4 0 0 0 4 4h7"
-      />
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-4 w-4" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 3v6a4 4 0 0 0 4 4h7" />
 
       <path strokeLinecap="round" strokeLinejoin="round" d="m12 10 3 3-3 3" />
     </svg>
