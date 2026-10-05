@@ -5,11 +5,8 @@ function IletisimSayfasi() {
     usePublicSite();
 
   const sirketAdi = firmaBilgisi?.sirketAdi || "Özmen Zımpara Market";
-
   const iletisimNo = firmaBilgisi?.iletisimNo?.trim() || "";
-
   const eposta = firmaBilgisi?.eposta?.trim() || "";
-
   const adres = tamAdres?.trim() || adresOlustur(firmaBilgisi);
 
   const haritaAramaBaglantisi = adres
@@ -26,44 +23,24 @@ function IletisimSayfasi() {
     <>
       <IletisimHero />
 
-      <main
-        className="
-          w-full
-          bg-[#f6f7f9]
-        "
-      >
+      <main className="w-full min-w-0 overflow-x-clip bg-[#f6f7f9]">
         {/* İletişim kanalları */}
-        <section
-          className="
-            py-14
-
-            sm:py-16
-            lg:py-20
-          "
-        >
-          <div
-            className="
-              mx-auto
-              w-full
-              max-w-[1440px]
-              px-5
-
-              sm:px-6
-              lg:px-8
-            "
-          >
+        <section className="py-14 sm:py-16 lg:py-20">
+          <div className="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8">
             <div
               className="
                 grid
+                min-w-0
+                grid-cols-1
                 gap-8
 
-                lg:grid-cols-[0.72fr_1.28fr]
+                lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)]
                 lg:items-start
                 lg:gap-12
               "
             >
               {/* Sol bilgi */}
-              <div>
+              <div className="min-w-0">
                 <p
                   className="
                     text-[11px]
@@ -80,7 +57,7 @@ function IletisimSayfasi() {
                   className="
                     mt-3
                     max-w-[560px]
-                    text-[30px]
+                    text-[28px]
                     font-extrabold
                     leading-[1.2]
                     tracking-[-0.04em]
@@ -125,11 +102,15 @@ function IletisimSayfasi() {
                 <div
                   className="
                     mt-7
+                    w-full
+                    min-w-0
                     rounded-[22px]
                     border
                     border-zinc-200
                     bg-white
-                    p-5
+                    p-4
+
+                    sm:p-5
                   "
                 >
                   <p
@@ -147,9 +128,13 @@ function IletisimSayfasi() {
                   <h3
                     className="
                       mt-2
-                      text-[18px]
+                      break-words
+                      [overflow-wrap:anywhere]
+                      text-[17px]
                       font-extrabold
                       text-zinc-950
+
+                      sm:text-[18px]
                     "
                   >
                     {sirketAdi}
@@ -159,6 +144,8 @@ function IletisimSayfasi() {
                     <p
                       className="
                         mt-3
+                        break-words
+                        [overflow-wrap:anywhere]
                         text-[12px]
                         leading-6
                         text-zinc-500
@@ -174,6 +161,8 @@ function IletisimSayfasi() {
               <div
                 className="
                   grid
+                  min-w-0
+                  grid-cols-1
                   gap-4
 
                   sm:grid-cols-2
@@ -227,31 +216,13 @@ function IletisimSayfasi() {
         </section>
 
         {/* Harita */}
-        <section
-          className="
-            border-y
-            border-zinc-200/70
-            bg-white
-            py-16
-
-            lg:py-20
-          "
-        >
-          <div
-            className="
-              mx-auto
-              w-full
-              max-w-[1440px]
-              px-5
-
-              sm:px-6
-              lg:px-8
-            "
-          >
+        <section className="border-y border-zinc-200/70 bg-white py-14 sm:py-16 lg:py-20">
+          <div className="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8">
             <div
               className="
                 mb-8
                 flex
+                min-w-0
                 flex-col
                 gap-5
 
@@ -260,7 +231,7 @@ function IletisimSayfasi() {
                 lg:justify-between
               "
             >
-              <div>
+              <div className="min-w-0">
                 <p
                   className="
                     text-[11px]
@@ -276,7 +247,7 @@ function IletisimSayfasi() {
                 <h2
                   className="
                     mt-3
-                    text-[30px]
+                    text-[28px]
                     font-extrabold
                     tracking-[-0.04em]
                     text-zinc-950
@@ -292,6 +263,8 @@ function IletisimSayfasi() {
                 <p
                   className="
                     max-w-[560px]
+                    break-words
+                    [overflow-wrap:anywhere]
                     text-[13px]
                     leading-6
                     text-zinc-500
@@ -305,12 +278,16 @@ function IletisimSayfasi() {
             {haritaEmbedBaglantisi ? (
               <div
                 className="
+                  w-full
+                  min-w-0
                   overflow-hidden
-                  rounded-[26px]
+                  rounded-[20px]
                   border
                   border-zinc-200
                   bg-zinc-100
                   shadow-[0_18px_50px_rgba(15,23,42,0.05)]
+
+                  sm:rounded-[26px]
                 "
               >
                 <iframe
@@ -319,10 +296,11 @@ function IletisimSayfasi() {
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
                   className="
-                    h-[420px]
+                    h-[340px]
                     w-full
                     border-0
 
+                    sm:h-[420px]
                     lg:h-[520px]
                   "
                 />
@@ -331,39 +309,30 @@ function IletisimSayfasi() {
               <div
                 className="
                   flex
-                  min-h-[320px]
+                  min-h-[280px]
                   items-center
                   justify-center
-                  rounded-[26px]
+                  rounded-[20px]
                   border
                   border-dashed
                   border-zinc-200
                   bg-zinc-50
-                  px-6
+                  px-5
                   text-center
+
+                  sm:min-h-[320px]
+                  sm:rounded-[26px]
+                  sm:px-6
                 "
               >
                 <div>
                   <LocationIconLarge />
 
-                  <h3
-                    className="
-                      mt-4
-                      text-[16px]
-                      font-extrabold
-                      text-zinc-900
-                    "
-                  >
+                  <h3 className="mt-4 text-[16px] font-extrabold text-zinc-900">
                     Konum bilgisi bulunamadı
                   </h3>
 
-                  <p
-                    className="
-                      mt-2
-                      text-[12px]
-                      text-zinc-500
-                    "
-                  >
+                  <p className="mt-2 text-[12px] text-zinc-500">
                     Firma adresi yayınlandığında harita burada
                     görüntülenecektir.
                   </p>
@@ -372,13 +341,7 @@ function IletisimSayfasi() {
             )}
 
             {haritaAramaBaglantisi && (
-              <div
-                className="
-                  mt-5
-                  flex
-                  justify-end
-                "
-              >
+              <div className="mt-5 flex justify-stretch sm:justify-end">
                 <a
                   href={haritaAramaBaglantisi}
                   target="_blank"
@@ -386,6 +349,7 @@ function IletisimSayfasi() {
                   className="
                     inline-flex
                     min-h-[44px]
+                    w-full
                     items-center
                     justify-center
                     gap-2
@@ -401,6 +365,8 @@ function IletisimSayfasi() {
 
                     hover:border-purple-200
                     hover:text-purple-700
+
+                    sm:w-auto
                   "
                 >
                   <LocationIconSmall />
@@ -413,36 +379,23 @@ function IletisimSayfasi() {
         </section>
 
         {/* Hızlı iletişim */}
-        <section
-          className="
-            py-16
-
-            lg:py-20
-          "
-        >
-          <div
-            className="
-              mx-auto
-              w-full
-              max-w-[1440px]
-              px-5
-
-              sm:px-6
-              lg:px-8
-            "
-          >
+        <section className="py-14 sm:py-16 lg:py-20">
+          <div className="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8">
             <div
               className="
                 relative
+                min-w-0
                 overflow-hidden
-                rounded-[28px]
+                rounded-[22px]
                 bg-gradient-to-br
                 from-[#0b0f1c]
                 to-[#171025]
-                px-6
-                py-10
+                px-5
+                py-9
 
+                sm:rounded-[28px]
                 sm:px-9
+                sm:py-10
 
                 lg:flex
                 lg:items-center
@@ -466,7 +419,7 @@ function IletisimSayfasi() {
                 "
               />
 
-              <div className="relative">
+              <div className="relative min-w-0">
                 <p
                   className="
                     text-[11px]
@@ -483,7 +436,7 @@ function IletisimSayfasi() {
                   className="
                     mt-3
                     max-w-[720px]
-                    text-[26px]
+                    text-[24px]
                     font-extrabold
                     leading-[1.2]
                     tracking-[-0.035em]
@@ -515,8 +468,13 @@ function IletisimSayfasi() {
                   relative
                   mt-7
                   flex
-                  flex-wrap
+                  w-full
+                  flex-col
                   gap-3
+
+                  sm:w-auto
+                  sm:flex-row
+                  sm:flex-wrap
 
                   lg:mt-0
                   lg:shrink-0
@@ -530,6 +488,7 @@ function IletisimSayfasi() {
                     className="
                       inline-flex
                       min-h-[46px]
+                      w-full
                       items-center
                       justify-center
                       gap-2
@@ -543,6 +502,8 @@ function IletisimSayfasi() {
 
                       hover:-translate-y-0.5
                       hover:bg-[#20bd5a]
+
+                      sm:w-auto
                     "
                   >
                     <WhatsAppIcon />
@@ -556,6 +517,7 @@ function IletisimSayfasi() {
                     className="
                       inline-flex
                       min-h-[46px]
+                      w-full
                       items-center
                       justify-center
                       gap-2
@@ -570,6 +532,8 @@ function IletisimSayfasi() {
                       transition-colors
 
                       hover:bg-white/[0.08]
+
+                      sm:w-auto
                     "
                   >
                     <PhoneIcon />
@@ -591,7 +555,7 @@ function IletisimHero() {
       className="
         relative
         isolate
-        min-h-[330px]
+        min-h-[310px]
         overflow-hidden
         bg-[#060913]
 
@@ -599,7 +563,6 @@ function IletisimHero() {
         lg:min-h-[400px]
       "
     >
-      {/* Hero arka plan görseli */}
       <img
         src="/images/hero/hero-iletisim.png"
         alt=""
@@ -615,7 +578,6 @@ function IletisimHero() {
         "
       />
 
-      {/* Metin okunabilirliği için koyu overlay */}
       <div
         className="
           pointer-events-none
@@ -629,18 +591,8 @@ function IletisimHero() {
         "
       />
 
-      {/* Genel kontrast */}
-      <div
-        className="
-          pointer-events-none
-          absolute
-          inset-0
-          -z-20
-          bg-black/10
-        "
-      />
+      <div className="pointer-events-none absolute inset-0 -z-20 bg-black/10" />
 
-      {/* Sol mavi vurgu */}
       <div
         className="
           pointer-events-none
@@ -656,7 +608,6 @@ function IletisimHero() {
         "
       />
 
-      {/* Sağ mor vurgu */}
       <div
         className="
           pointer-events-none
@@ -677,11 +628,12 @@ function IletisimHero() {
           relative
           mx-auto
           flex
-          min-h-[330px]
+          min-h-[310px]
           w-full
           max-w-[1440px]
           items-center
-          px-5
+          px-4
+          py-10
 
           sm:min-h-[370px]
           sm:px-6
@@ -690,14 +642,16 @@ function IletisimHero() {
           lg:px-8
         "
       >
-        <div className="max-w-[760px]">
+        <div className="min-w-0 max-w-[760px]">
           <p
             className="
-              text-[11px]
+              text-[10px]
               font-extrabold
               uppercase
               tracking-[0.17em]
               text-purple-300
+
+              sm:text-[11px]
             "
           >
             Bize Ulaşın
@@ -706,12 +660,13 @@ function IletisimHero() {
           <h1
             className="
               mt-4
-              text-[36px]
+              text-[32px]
               font-extrabold
               leading-[1.15]
               tracking-[-0.045em]
               text-white
 
+              min-[360px]:text-[36px]
               sm:text-[46px]
               lg:text-[54px]
             "
@@ -737,7 +692,7 @@ function IletisimHero() {
             className="
               mt-4
               max-w-[680px]
-              text-[15px]
+              text-[14px]
               leading-7
               text-white/70
 
@@ -753,6 +708,7 @@ function IletisimHero() {
     </section>
   );
 }
+
 function IletisimKarti({
   icon,
   ustBaslik,
@@ -769,6 +725,7 @@ function IletisimKarti({
           flex
           h-11
           w-11
+          shrink-0
           items-center
           justify-center
           rounded-xl
@@ -799,7 +756,9 @@ function IletisimKarti({
       <h3
         className="
           mt-1.5
+          min-w-0
           break-words
+          [overflow-wrap:anywhere]
           text-[16px]
           font-extrabold
           leading-6
@@ -812,6 +771,7 @@ function IletisimKarti({
       <p
         className="
           mt-3
+          break-words
           text-[12px]
           leading-6
           text-zinc-500
@@ -842,15 +802,21 @@ function IletisimKarti({
 
   const className = `
     flex
-    min-h-[245px]
+    w-full
+    min-w-0
+    min-h-[220px]
     flex-col
+    overflow-hidden
     rounded-[22px]
     border
     border-zinc-200/80
     bg-white
-    p-5
+    p-4
     transition-all
     duration-300
+
+    sm:min-h-[245px]
+    sm:p-5
 
     ${
       href
@@ -876,58 +842,28 @@ function IletisimKarti({
 }
 
 function IletisimKartlariSkeleton() {
-  return Array.from({
-    length: 4,
-  }).map((_, index) => (
+  return Array.from({ length: 4 }).map((_, index) => (
     <div
       key={index}
       className="
-        min-h-[245px]
+        min-h-[220px]
+        w-full
+        min-w-0
         animate-pulse
         rounded-[22px]
         border
         border-zinc-200
         bg-white
-        p-5
+        p-4
+
+        sm:min-h-[245px]
+        sm:p-5
       "
     >
-      <div
-        className="
-          h-11
-          w-11
-          rounded-xl
-          bg-zinc-100
-        "
-      />
-
-      <div
-        className="
-          mt-6
-          h-3
-          w-20
-          rounded
-          bg-zinc-100
-        "
-      />
-
-      <div
-        className="
-          mt-3
-          h-5
-          w-3/4
-          rounded
-          bg-zinc-100
-        "
-      />
-
-      <div
-        className="
-          mt-5
-          h-14
-          rounded
-          bg-zinc-50
-        "
-      />
+      <div className="h-11 w-11 rounded-xl bg-zinc-100" />
+      <div className="mt-6 h-3 w-20 rounded bg-zinc-100" />
+      <div className="mt-3 h-5 w-3/4 rounded bg-zinc-100" />
+      <div className="mt-5 h-14 rounded bg-zinc-50" />
     </div>
   ));
 }
@@ -980,7 +916,6 @@ function WhatsAppIcon() {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-
       <path d="M9 8.5c.5 2.5 2 4 4.5 5" strokeLinecap="round" />
     </svg>
   );
@@ -997,7 +932,6 @@ function MailIcon() {
       aria-hidden="true"
     >
       <rect x="3" y="5" width="18" height="14" rx="2" />
-
       <path d="m4 7 8 6 8-6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
@@ -1017,7 +951,6 @@ function LocationIcon() {
         d="M12 21s6-5.5 6-11a6 6 0 1 0-12 0c0 5.5 6 11 6 11Z"
         strokeLinejoin="round"
       />
-
       <circle cx="12" cy="10" r="2" />
     </svg>
   );
@@ -1037,7 +970,6 @@ function LocationIconSmall() {
         d="M12 21s6-5.5 6-11a6 6 0 1 0-12 0c0 5.5 6 11 6 11Z"
         strokeLinejoin="round"
       />
-
       <circle cx="12" cy="10" r="2" />
     </svg>
   );
@@ -1050,19 +982,13 @@ function LocationIconLarge() {
       fill="none"
       stroke="currentColor"
       strokeWidth="1.6"
-      className="
-        mx-auto
-        h-10
-        w-10
-        text-purple-500
-      "
+      className="mx-auto h-10 w-10 text-purple-500"
       aria-hidden="true"
     >
       <path
         d="M12 21s6-5.5 6-11a6 6 0 1 0-12 0c0 5.5 6 11 6 11Z"
         strokeLinejoin="round"
       />
-
       <circle cx="12" cy="10" r="2" />
     </svg>
   );

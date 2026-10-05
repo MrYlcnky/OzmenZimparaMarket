@@ -7,332 +7,522 @@ using Microsoft.OpenApi;
 using OzmenZimparaMarket.Application.Interfaces;
 using OzmenZimparaMarket.Infrastructure;
 using OzmenZimparaMarket.Infrastructure.Ayarlar;
-using OzmenZimparaMarket.Infrastructure.Veritabani;
 using OzmenZimparaMarket.WebAPI.AraKatmanlar;
 using OzmenZimparaMarket.WebAPI.Filtreler;
 using OzmenZimparaMarket.WebAPI.Modeller;
 using System.Text;
 using System.Threading.RateLimiting;
 
-
-var builder = WebApplication.CreateBuilder(args);
-
-var allowedHosts = builder.Configuration["AllowedHosts"];
-
-if (!builder.Environment.IsDevelopment() &&
-    (string.IsNullOrWhiteSpace(allowedHosts) || allowedHosts.Trim() == "*"))
+try
 {
-    throw new InvalidOperationException(
-        "Production ortamında AllowedHosts açıkça tanımlanmalı ve '*' kullanılamaz.");
-}
+    var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddHsts(options =>
-{
-    options.MaxAge = TimeSpan.FromDays(180);
-    options.IncludeSubDomains = true;
-    options.Preload = false;
-});
+    // ------------------------------------------------------------
+    // ALLOWED HOSTS
+    // ------------------------------------------------------------
 
+    var allowedHosts = builder.Configuration["AllowedHosts"];
 
-var webRootDizini = builder.Environment.WebRootPath;
-
-if (string.IsNullOrWhiteSpace(webRootDizini))
-{
-    webRootDizini = Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
-}
-
-Directory.CreateDirectory(webRootDizini);
-
-builder.Services.AddInfrastructure(
-    builder.Configuration,
-    webRootDizini);
-
-builder.Services.AddScoped<FluentValidationActionFilter>();
-
-builder.Services.AddControllers(options =>
-{
-    options.Filters.AddService<FluentValidationActionFilter>();
-});
-
-builder.Services.AddValidatorsFromAssembly(
-    typeof(IAuthServisi).Assembly);
-
-builder.Services.AddEndpointsApiExplorer();
-
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1", new OpenApiInfo
+    if (!builder.Environment.IsDevelopment() &&
+        (string.IsNullOrWhiteSpace(allowedHosts) ||
+         allowedHosts.Trim() == "*"))
     {
-        Title = "Özmen Zımpara Market API",
-        Version = "v1",
-        Description = "Özmen Zımpara Market ürün, kategori ve yönetim API'si."
+        throw new InvalidOperationException(
+            "Production ortamında AllowedHosts açıkça tanımlanmalı ve '*' kullanılamaz.");
+    }
+
+    // ------------------------------------------------------------
+    // HSTS
+    // ------------------------------------------------------------
+
+    builder.Services.AddHsts(options =>
+    {
+        options.MaxAge = TimeSpan.FromDays(180);
+        options.IncludeSubDomains = true;
+        options.Preload = false;
     });
 
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    // ------------------------------------------------------------
+    // WWWROOT
+    // ------------------------------------------------------------
+
+    var webRootDizini = builder.Environment.WebRootPath;
+
+    if (string.IsNullOrWhiteSpace(webRootDizini))
     {
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-        Description = "JWT token değerini giriniz."
+        webRootDizini = Path.Combine(
+            builder.Environment.ContentRootPath,
+            "wwwroot");
+    }
+
+    if (!Directory.Exists(webRootDizini))
+    {
+        Directory.CreateDirectory(webRootDizini);
+    }
+
+    // ------------------------------------------------------------
+    // INFRASTRUCTURE
+    // ------------------------------------------------------------
+
+    builder.Services.AddInfrastructure(
+        builder.Configuration,
+        webRootDizini);
+
+    // ------------------------------------------------------------
+    // VALIDATION
+    // ------------------------------------------------------------
+
+    builder.Services.AddScoped<FluentValidationActionFilter>();
+
+    builder.Services.AddControllers(options =>
+    {
+        options.Filters.AddService<FluentValidationActionFilter>();
     });
 
-    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    builder.Services.AddValidatorsFromAssembly(
+        typeof(IAuthServisi).Assembly);
+
+    // ------------------------------------------------------------
+    // SWAGGER
+    // ------------------------------------------------------------
+
+    builder.Services.AddEndpointsApiExplorer();
+
+    builder.Services.AddSwaggerGen(options =>
     {
-        [new OpenApiSecuritySchemeReference("Bearer", document)] = []
-    });
-});
-
-var jwtAyarlari = builder.Configuration
-    .GetSection(JwtAyarlari.BolumAdi)
-    .Get<JwtAyarlari>()
-    ?? throw new InvalidOperationException("JWT ayarları okunamadı.");
-
-if (string.IsNullOrWhiteSpace(jwtAyarlari.GizliAnahtar)) throw new InvalidOperationException("JWT gizli anahtarı tanımlanmamıştır.");
-if (jwtAyarlari.GizliAnahtar.Length < 32) throw new InvalidOperationException("JWT gizli anahtarı en az 32 karakter olmalıdır.");
-if (string.IsNullOrWhiteSpace(jwtAyarlari.Issuer)) throw new InvalidOperationException("JWT issuer bilgisi tanımlanmamıştır.");
-if (string.IsNullOrWhiteSpace(jwtAyarlari.Audience)) throw new InvalidOperationException("JWT audience bilgisi tanımlanmamıştır.");
-
-builder.Services
-    .AddAuthentication(options =>
-    {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddJwtBearer(options =>
-    {
-        options.MapInboundClaims = false;
-        options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
-        options.SaveToken = false;
-
-        options.TokenValidationParameters = new TokenValidationParameters
+        options.SwaggerDoc("v1", new OpenApiInfo
         {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtAyarlari.GizliAnahtar)),
+            Title = "Özmen Zımpara Market API",
+            Version = "v1",
+            Description = "Özmen Zımpara Market ürün, kategori ve yönetim API'si."
+        });
 
-            ValidateIssuer = true,
-            ValidIssuer = jwtAyarlari.Issuer,
-
-            ValidateAudience = true,
-            ValidAudience = jwtAyarlari.Audience,
-
-            ValidateLifetime = true,
-            RequireExpirationTime = true,
-
-            ClockSkew = TimeSpan.Zero,
-            NameClaimType = "kullaniciAdi"
-        };
-
-        options.Events = new JwtBearerEvents
-        {
-            OnChallenge = async context =>
+        options.AddSecurityDefinition(
+            "Bearer",
+            new OpenApiSecurityScheme
             {
-                context.HandleResponse();
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                Description = "JWT token değerini giriniz."
+            });
 
-                if (context.Response.HasStarted) return;
-
-                var cevap = new ApiHataCevabi
-                {
-                    DurumKodu = StatusCodes.Status401Unauthorized,
-                    Mesaj = "Bu işlem için giriş yapmanız gerekiyor.",
-                    TakipKodu = context.HttpContext.TraceIdentifier
-                };
-
-                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                context.Response.ContentType = "application/json; charset=utf-8";
-
-                await context.Response.WriteAsJsonAsync(
-                    cevap,
-                    cancellationToken: context.HttpContext.RequestAborted);
-            },
-
-            OnForbidden = async context =>
+        options.AddSecurityRequirement(
+            document => new OpenApiSecurityRequirement
             {
-                if (context.Response.HasStarted) return;
-
-                var cevap = new ApiHataCevabi
-                {
-                    DurumKodu = StatusCodes.Status403Forbidden,
-                    Mesaj = "Bu işlemi gerçekleştirmek için yeterli yetkiniz bulunmuyor.",
-                    TakipKodu = context.HttpContext.TraceIdentifier
-                };
-
-                context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                context.Response.ContentType = "application/json; charset=utf-8";
-
-                await context.Response.WriteAsJsonAsync(
-                    cevap,
-                    cancellationToken: context.HttpContext.RequestAborted);
-            }
-        };
-    });
-
-builder.Services.AddAuthorization();
-
-var izinVerilenOriginler = builder.Configuration
-    .GetSection("Cors:AllowedOrigins")
-    .Get<string[]>()
-    ?? [];
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("FrontendCors", policy =>
-    {
-        if (izinVerilenOriginler.Length > 0)
-        {
-            policy
-                .WithOrigins(izinVerilenOriginler)
-                .AllowAnyHeader()
-                .AllowAnyMethod();
-        }
-    });
-});
-
-builder.Services.AddRateLimiter(options =>
-{
-    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-
-    options.AddPolicy("GirisPolitikasi", httpContext =>
-    {
-        var istemciAdresi = httpContext.Connection.RemoteIpAddress?.ToString()
-                            ?? "bilinmeyen-istemci";
-
-        return RateLimitPartition.GetFixedWindowLimiter(
-            partitionKey: istemciAdresi,
-            factory: _ => new FixedWindowRateLimiterOptions
-            {
-                PermitLimit = 5,
-                Window = TimeSpan.FromMinutes(1),
-                QueueLimit = 0,
-                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-                AutoReplenishment = true
+                [new OpenApiSecuritySchemeReference(
+                    "Bearer",
+                    document)] = []
             });
     });
 
-    options.OnRejected = async (context, cancellationToken) =>
-    {
-        var cevap = new ApiHataCevabi
-        {
-            DurumKodu = StatusCodes.Status429TooManyRequests,
-            Mesaj = "Çok fazla giriş denemesi yapıldı. Lütfen kısa bir süre sonra tekrar deneyiniz.",
-            TakipKodu = context.HttpContext.TraceIdentifier
-        };
+    // ------------------------------------------------------------
+    // JWT
+    // ------------------------------------------------------------
 
-        context.HttpContext.Response.StatusCode =
+    var jwtAyarlari = builder.Configuration
+        .GetSection(JwtAyarlari.BolumAdi)
+        .Get<JwtAyarlari>()
+        ?? throw new InvalidOperationException(
+            "JWT ayarları okunamadı.");
+
+    if (string.IsNullOrWhiteSpace(jwtAyarlari.GizliAnahtar))
+    {
+        throw new InvalidOperationException(
+            "JWT gizli anahtarı tanımlanmamıştır.");
+    }
+
+    if (jwtAyarlari.GizliAnahtar.Length < 32)
+    {
+        throw new InvalidOperationException(
+            "JWT gizli anahtarı en az 32 karakter olmalıdır.");
+    }
+
+    if (string.IsNullOrWhiteSpace(jwtAyarlari.Issuer))
+    {
+        throw new InvalidOperationException(
+            "JWT issuer bilgisi tanımlanmamıştır.");
+    }
+
+    if (string.IsNullOrWhiteSpace(jwtAyarlari.Audience))
+    {
+        throw new InvalidOperationException(
+            "JWT audience bilgisi tanımlanmamıştır.");
+    }
+
+    builder.Services
+        .AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme =
+                JwtBearerDefaults.AuthenticationScheme;
+
+            options.DefaultChallengeScheme =
+                JwtBearerDefaults.AuthenticationScheme;
+
+            options.DefaultScheme =
+                JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.MapInboundClaims = false;
+
+            options.RequireHttpsMetadata =
+                !builder.Environment.IsDevelopment();
+
+            options.SaveToken = false;
+
+            options.TokenValidationParameters =
+                new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+
+                    IssuerSigningKey =
+                        new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(
+                                jwtAyarlari.GizliAnahtar)),
+
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtAyarlari.Issuer,
+
+                    ValidateAudience = true,
+                    ValidAudience = jwtAyarlari.Audience,
+
+                    ValidateLifetime = true,
+                    RequireExpirationTime = true,
+
+                    ClockSkew = TimeSpan.Zero,
+
+                    NameClaimType = "kullaniciAdi"
+                };
+
+            options.Events = new JwtBearerEvents
+            {
+                OnChallenge = async context =>
+                {
+                    context.HandleResponse();
+
+                    if (context.Response.HasStarted)
+                    {
+                        return;
+                    }
+
+                    var cevap = new ApiHataCevabi
+                    {
+                        DurumKodu =
+                            StatusCodes.Status401Unauthorized,
+
+                        Mesaj =
+                            "Bu işlem için giriş yapmanız gerekiyor.",
+
+                        TakipKodu =
+                            context.HttpContext.TraceIdentifier
+                    };
+
+                    context.Response.StatusCode =
+                        StatusCodes.Status401Unauthorized;
+
+                    context.Response.ContentType =
+                        "application/json; charset=utf-8";
+
+                    await context.Response.WriteAsJsonAsync(
+                        cevap,
+                        cancellationToken:
+                        context.HttpContext.RequestAborted);
+                },
+
+                OnForbidden = async context =>
+                {
+                    if (context.Response.HasStarted)
+                    {
+                        return;
+                    }
+
+                    var cevap = new ApiHataCevabi
+                    {
+                        DurumKodu =
+                            StatusCodes.Status403Forbidden,
+
+                        Mesaj =
+                            "Bu işlemi gerçekleştirmek için yeterli yetkiniz bulunmuyor.",
+
+                        TakipKodu =
+                            context.HttpContext.TraceIdentifier
+                    };
+
+                    context.Response.StatusCode =
+                        StatusCodes.Status403Forbidden;
+
+                    context.Response.ContentType =
+                        "application/json; charset=utf-8";
+
+                    await context.Response.WriteAsJsonAsync(
+                        cevap,
+                        cancellationToken:
+                        context.HttpContext.RequestAborted);
+                }
+            };
+        });
+
+    builder.Services.AddAuthorization();
+
+    // ------------------------------------------------------------
+    // CORS
+    // ------------------------------------------------------------
+
+    var izinVerilenOriginler = builder.Configuration
+        .GetSection("Cors:AllowedOrigins")
+        .Get<string[]>()
+        ?? Array.Empty<string>();
+
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy(
+            "FrontendCors",
+            policy =>
+            {
+                if (izinVerilenOriginler.Length > 0)
+                {
+                    policy
+                        .WithOrigins(izinVerilenOriginler)
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                }
+            });
+    });
+
+    // ------------------------------------------------------------
+    // RATE LIMIT
+    // ------------------------------------------------------------
+
+    builder.Services.AddRateLimiter(options =>
+    {
+        options.RejectionStatusCode =
             StatusCodes.Status429TooManyRequests;
 
-        context.HttpContext.Response.ContentType =
-            "application/json; charset=utf-8";
+        options.AddPolicy(
+            "GirisPolitikasi",
+            httpContext =>
+            {
+                var istemciAdresi =
+                    httpContext.Connection
+                        .RemoteIpAddress?
+                        .ToString()
+                    ?? "bilinmeyen-istemci";
 
-        await context.HttpContext.Response.WriteAsJsonAsync(
-            cevap,
-            cancellationToken: cancellationToken);
-    };
-});
+                return RateLimitPartition
+                    .GetFixedWindowLimiter(
+                        partitionKey: istemciAdresi,
+                        factory: _ =>
+                            new FixedWindowRateLimiterOptions
+                            {
+                                PermitLimit = 5,
+                                Window = TimeSpan.FromMinutes(1),
+                                QueueLimit = 0,
+                                QueueProcessingOrder =
+                                    QueueProcessingOrder.OldestFirst,
+                                AutoReplenishment = true
+                            });
+            });
 
-var maksimumDosyaBoyutu = builder.Configuration
-    .GetValue<long>("Dosya:MaksimumDosyaBoyutu");
+        options.OnRejected =
+            async (context, cancellationToken) =>
+            {
+                var cevap = new ApiHataCevabi
+                {
+                    DurumKodu =
+                        StatusCodes.Status429TooManyRequests,
 
-if (maksimumDosyaBoyutu <= 0)
-    throw new InvalidOperationException("Maksimum dosya boyutu tanımlanmamıştır.");
+                    Mesaj =
+                        "Çok fazla giriş denemesi yapıldı. Lütfen kısa bir süre sonra tekrar deneyiniz.",
 
-var maksimumIstekBoyutu = checked(
-    maksimumDosyaBoyutu + (1024L * 1024L));
+                    TakipKodu =
+                        context.HttpContext.TraceIdentifier
+                };
 
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.Limits.MaxRequestBodySize = maksimumIstekBoyutu;
-});
+                context.HttpContext.Response.StatusCode =
+                    StatusCodes.Status429TooManyRequests;
 
-builder.Services.Configure<FormOptions>(options =>
-{
-    options.MultipartBodyLengthLimit = maksimumIstekBoyutu;
-});
+                context.HttpContext.Response.ContentType =
+                    "application/json; charset=utf-8";
 
-builder.Services.Configure<ApiBehaviorOptions>(options =>
-{
-    options.InvalidModelStateResponseFactory = context =>
+                await context.HttpContext.Response
+                    .WriteAsJsonAsync(
+                        cevap,
+                        cancellationToken:
+                        cancellationToken);
+            };
+    });
+
+    // ------------------------------------------------------------
+    // DOSYA BOYUTLARI
+    // ------------------------------------------------------------
+
+    var maksimumDosyaBoyutu =
+        builder.Configuration
+            .GetValue<long>(
+                "Dosya:MaksimumDosyaBoyutu");
+
+    if (maksimumDosyaBoyutu <= 0)
     {
-        var hatalar = context.ModelState
-            .Where(x => x.Value?.Errors.Count > 0)
-            .ToDictionary(
-                x => x.Key,
-                x => x.Value!.Errors
-                    .Select(hata =>
-                        string.IsNullOrWhiteSpace(hata.ErrorMessage)
-                            ? "Gönderilen değer geçersizdir."
-                            : hata.ErrorMessage)
-                    .Distinct()
-                    .ToArray());
+        throw new InvalidOperationException(
+            "Maksimum dosya boyutu tanımlanmamıştır.");
+    }
 
-        var cevap = new ApiHataCevabi
+    var maksimumIstekBoyutu =
+        checked(
+            maksimumDosyaBoyutu +
+            (1024L * 1024L));
+
+    builder.WebHost.ConfigureKestrel(options =>
+    {
+        options.Limits.MaxRequestBodySize =
+            maksimumIstekBoyutu;
+    });
+
+    builder.Services.Configure<FormOptions>(
+        options =>
         {
-            DurumKodu = StatusCodes.Status400BadRequest,
-            Mesaj = "Gönderilen bilgiler doğrulanamadı.",
-            TakipKodu = context.HttpContext.TraceIdentifier,
-            Hatalar = hatalar
-        };
+            options.MultipartBodyLengthLimit =
+                maksimumIstekBoyutu;
+        });
 
-        return new BadRequestObjectResult(cevap);
-    };
-});
+    // ------------------------------------------------------------
+    // API VALIDATION RESPONSE
+    // ------------------------------------------------------------
 
-var app = builder.Build();
+    builder.Services.Configure<ApiBehaviorOptions>(
+        options =>
+        {
+            options.InvalidModelStateResponseFactory =
+                context =>
+                {
+                    var hatalar =
+                        context.ModelState
+                            .Where(
+                                x =>
+                                    x.Value?.Errors.Count > 0)
+                            .ToDictionary(
+                                x => x.Key,
+                                x => x.Value!.Errors
+                                    .Select(
+                                        hata =>
+                                            string.IsNullOrWhiteSpace(
+                                                hata.ErrorMessage)
+                                                ? "Gönderilen değer geçersizdir."
+                                                : hata.ErrorMessage)
+                                    .Distinct()
+                                    .ToArray());
 
-app.UseMiddleware<GlobalHataYonetimiMiddleware>();
+                    var cevap =
+                        new ApiHataCevabi
+                        {
+                            DurumKodu =
+                                StatusCodes.Status400BadRequest,
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
+                            Mesaj =
+                                "Gönderilen bilgiler doğrulanamadı.",
+
+                            TakipKodu =
+                                context.HttpContext.TraceIdentifier,
+
+                            Hatalar = hatalar
+                        };
+
+                    return new BadRequestObjectResult(
+                        cevap);
+                };
+        });
+
+    // ------------------------------------------------------------
+    // BUILD
+    // ------------------------------------------------------------
+
+    var app = builder.Build();
+
+    // ------------------------------------------------------------
+    // GLOBAL ERROR HANDLING
+    // ------------------------------------------------------------
+
+    app.UseMiddleware<GlobalHataYonetimiMiddleware>();
+
+    // ------------------------------------------------------------
+    // SWAGGER / HSTS
+    // ------------------------------------------------------------
+
+    if (app.Environment.IsDevelopment())
     {
-        options.SwaggerEndpoint(
-            "/swagger/v1/swagger.json",
-            "Özmen Zımpara Market API v1");
+        app.UseSwagger();
 
-        options.DocumentTitle =
-            "Özmen Zımpara Market API";
-    });
-}
-else
-{
-    app.UseHsts();
-}
+        app.UseSwaggerUI(options =>
+        {
+            options.SwaggerEndpoint(
+                "/swagger/v1/swagger.json",
+                "Özmen Zımpara Market API v1");
 
-app.UseHttpsRedirection();
-
-app.Use(async (context, next) =>
-{
-    context.Response.OnStarting(() =>
+            options.DocumentTitle =
+                "Özmen Zımpara Market API";
+        });
+    }
+    else
     {
-        context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+        app.UseHsts();
+    }
 
-        return Task.CompletedTask;
+    // ------------------------------------------------------------
+    // PIPELINE
+    // ------------------------------------------------------------
+
+    app.UseHttpsRedirection();
+
+    app.Use(async (context, next) =>
+    {
+        context.Response.OnStarting(() =>
+        {
+            context.Response.Headers[
+                "X-Content-Type-Options"] =
+                "nosniff";
+
+            return Task.CompletedTask;
+        });
+
+        await next();
     });
 
-    await next();
-});
+    app.UseStaticFiles();
 
-app.UseStaticFiles();
+    app.UseRouting();
 
-app.UseRouting();
+    app.UseCors("FrontendCors");
 
-app.UseCors("FrontendCors");
+    app.UseRateLimiter();
 
-app.UseRateLimiter();
+    app.UseAuthentication();
 
-app.UseAuthentication();
-app.UseAuthorization();
+    app.UseAuthorization();
 
-app.MapControllers();
+    app.MapControllers();
 
-using (var scope = app.Services.CreateScope())
-{
-    var veritabaniBaslaticisi =
-        scope.ServiceProvider.GetRequiredService<VeritabaniBaslaticisi>();
+    // ------------------------------------------------------------
+    // START
+    // ------------------------------------------------------------
 
-    await veritabaniBaslaticisi.BaslangicVerileriniOlusturAsync();
+    app.Run();
 }
+catch (Exception ex)
+{
+    Console.Error.WriteLine(
+        "========================================");
 
-app.Run();
+    Console.Error.WriteLine(
+        "ÖZMEN ZIMPARA MARKET STARTUP HATASI");
+
+    Console.Error.WriteLine(
+        "========================================");
+
+    Console.Error.WriteLine(ex.ToString());
+
+    Console.Error.WriteLine(
+        "========================================");
+
+    throw;
+}

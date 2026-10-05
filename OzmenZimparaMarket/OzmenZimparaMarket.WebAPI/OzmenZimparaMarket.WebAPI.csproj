@@ -1,14 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-	  <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
 
-  <ItemGroup>
-    <Content Remove="web.config" />
-  </ItemGroup>
+		<IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
@@ -23,13 +21,20 @@
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
 	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\OzmenZimparaMarket.Application\OzmenZimparaMarket.Application.csproj" />
-    <ProjectReference Include="..\OzmenZimparaMarket.Infrastructure\OzmenZimparaMarket.Infrastructure.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\OzmenZimparaMarket.Application\OzmenZimparaMarket.Application.csproj" />
+		<ProjectReference Include="..\OzmenZimparaMarket.Infrastructure\OzmenZimparaMarket.Infrastructure.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Include="web.config" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="web.config">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="logs\" />
+	</ItemGroup>
 
 </Project>

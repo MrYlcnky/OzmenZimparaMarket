@@ -349,6 +349,59 @@ function PublicHeader() {
             </a>
           )}
 
+<NavLink
+  to="/teklif-sepeti"
+  onClick={menuleriKapat}
+  className="
+    relative
+    flex
+    h-10
+    w-10
+    items-center
+    justify-center
+    rounded-xl
+    border
+    border-white/[0.08]
+    bg-white/[0.03]
+    text-white/80
+    transition-colors
+
+    hover:border-purple-400/25
+    hover:bg-white/[0.07]
+    hover:text-white
+
+    sm:hidden
+  "
+  aria-label={`Teklif sepeti, ${sepetKalemSayisi} ürün`}
+>
+  <CartIcon />
+
+  {sepetKalemSayisi > 0 && (
+    <span
+      className="
+        absolute
+        -right-1.5
+        -top-1.5
+        flex
+        h-5
+        min-w-5
+        items-center
+        justify-center
+        rounded-full
+        bg-gradient-to-r
+        from-blue-500
+        to-purple-500
+        px-1
+        text-[9px]
+        font-extrabold
+        text-white
+      "
+    >
+      {sepetKalemSayisi > 99 ? "99+" : sepetKalemSayisi}
+    </span>
+  )}
+</NavLink>
+
           {/* Mobil menü */}
           <button
             type="button"

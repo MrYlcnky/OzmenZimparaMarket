@@ -104,63 +104,69 @@ function PublicMobileMenu({
           "
         />
 
-        <div
-          className="
-            flex
-            items-center
-            justify-between
-            rounded-xl
-            border
-            border-white/[0.08]
-            bg-white/[0.025]
-            px-4
-            py-3.5
-          "
-        >
-          <div className="flex items-center gap-3">
-            <CartIcon />
+    <NavLink
+  to="/teklif-sepeti"
+  onClick={onClose}
+  className={({ isActive }) => `
+    flex
+    w-full
+    items-center
+    justify-between
+    rounded-xl
+    border
+    px-4
+    py-3.5
+    transition-all
+    duration-200
 
-            <div>
-              <p
-                className="
-                  text-sm
-                  font-bold
-                  text-white/90
-                "
-              >
-                Teklif Sepeti
-              </p>
+    ${
+      isActive
+        ? "border-purple-400/30 bg-purple-500/10"
+        : "border-white/[0.08] bg-white/[0.025] hover:border-purple-400/25 hover:bg-white/[0.05]"
+    }
+  `}
+  aria-label={`Teklif sepeti, ${sepetKalemSayisi} ürün`}
+>
+  <div className="flex min-w-0 items-center gap-3">
+    <div className="shrink-0">
+      <CartIcon />
+    </div>
 
-              <p
-                className="
-                  mt-0.5
-                  text-[11px]
-                  text-white/40
-                "
-              >
-                {sepetKalemSayisi} ürün seçildi
-              </p>
-            </div>
-          </div>
+    <div className="min-w-0">
+      <p className="text-sm font-bold text-white/90">
+        Teklif Sepeti
+      </p>
 
-          <span
-            className="
-              flex
-              h-7
-              min-w-7
-              items-center
-              justify-center
-              rounded-full
-              bg-purple-500
-              px-2
-              text-xs
-              font-extrabold
-              text-white
-            "
-          >
-            {sepetKalemSayisi}
-          </span>
-        </div>
+      <p className="mt-0.5 text-[11px] text-white/40">
+        {sepetKalemSayisi > 0
+          ? `${sepetKalemSayisi} ürün seçildi`
+          : "Henüz ürün eklenmedi"}
+      </p>
+    </div>
+  </div>
+
+  <span
+    className="
+      ml-3
+      flex
+      h-7
+      min-w-7
+      shrink-0
+      items-center
+      justify-center
+      rounded-full
+      bg-gradient-to-r
+      from-blue-500
+      to-purple-500
+      px-2
+      text-xs
+      font-extrabold
+      text-white
+    "
+  >
+    {sepetKalemSayisi}
+  </span>
+</NavLink>
 
         {whatsappBaglantisi && (
           <a
